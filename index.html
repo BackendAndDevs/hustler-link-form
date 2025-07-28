@@ -5,11 +5,7 @@
   <title>HustleLink Registration</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="logo.png" type="image/x-icon" />
-
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  >
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     .hidden { display: none; }
     .alert-message {
@@ -28,27 +24,29 @@
       color: #721c24;
       border: 1px solid #f5c6cb;
     }
+    .is-invalid {
+      border-color: #dc3545;
+    }
+    .invalid-feedback {
+      color: #dc3545;
+      font-size: 0.875em;
+    }
   </style>
 </head>
 <body class="bg-light">
-
   <div class="container py-5">
     <div class="row justify-content-center">
       <div class="col-md-10 bg-white p-4 shadow rounded">
-          <center><img
-          src="logo.png"
-          alt="Logo"
-          class="rounded-circle mb-3"
-          width="150"
-          height="150"
-        />
-       <h2 class="mb-3 text-center" style="color:#F25C05" >Register on HustlerLink</h2></center>
-      <p>
-  HustlerLink is an AI-powered mobile platform connecting Africa's informal workers to real jobs, digital work identity, skill coaching, and payments.
-  From <strong>mama fuas</strong> to <strong>boda riders</strong>, <strong>street barbers</strong>, <strong>mjengo hands</strong>, <strong>mitumba sorters</strong>, <strong>water vendors</strong>, <strong>hawkers</strong>, and <strong>online hustlers</strong>, we help hustlers build income, trust, and growth – no CV, no barriers.
-</p>
+        <center>
+          <img src="logo.png" alt="Logo" class="rounded-circle mb-3" width="150" height="150">
+          <h2 class="mb-3 text-center" style="color:#F25C05">Register on HustlerLink</h2>
+        </center>
+        <p>
+          HustlerLink is an AI-powered mobile platform connecting Africa's informal workers to real jobs, digital work identity, skill coaching, and payments.
+          From <strong>mama fuas</strong> to <strong>boda riders</strong>, <strong>street barbers</strong>, <strong>mjengo hands</strong>, <strong>mitumba sorters</strong>, <strong>water vendors</strong>, <strong>hawkers</strong>, and <strong>online hustlers</strong>, we help hustlers build income, trust, and growth – no CV, no barriers.
+        </p>
 
-        <form id="userForm">
+        <form id="userForm" novalidate>
           <div class="mb-3">
             <label for="userType" class="form-label">I am registering as:</label>
             <select class="form-select" id="userType" name="userType" required>
@@ -57,6 +55,7 @@
               <option value="Employer">Employer</option>
               <option value="Real Estate">Real Estate Professional</option>
             </select>
+            <div class="invalid-feedback">Please select a registration type.</div>
           </div>
 
           <!-- 👷 JOB SEEKER SECTION -->
@@ -65,11 +64,13 @@
             <div class="row">
               <div class="col-md-6 mb-3">
                 <label class="form-label">Full Name</label>
-                <input type="text" class="form-control" name="name" required>
+                <input type="text" class="form-control" name="name">
+                <div class="invalid-feedback">Please provide your full name.</div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Phone Number</label>
-                <input type="tel" class="form-control" name="phone" required>
+                <input type="tel" class="form-control" name="phone">
+                <div class="invalid-feedback">Please provide your phone number.</div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Email (optional)</label>
@@ -77,43 +78,48 @@
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Age</label>
-                <input type="number" class="form-control" name="age" required>
+                <input type="number" class="form-control" name="age">
+                <div class="invalid-feedback">Please provide your age.</div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Gender</label>
-                <select class="form-select" name="gender" required>
+                <select class="form-select" name="gender">
                   <option value="">Select</option>
                   <option>Male</option>
                   <option>Female</option>
                   <option>Other</option>
                 </select>
+                <div class="invalid-feedback">Please select your gender.</div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Location / County</label>
-                <input type="text" class="form-control" name="location" required>
+                <input type="text" class="form-control" name="location">
+                <div class="invalid-feedback">Please provide your location.</div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Profession / Work Type</label>
-                <input type="text" class="form-control" name="profession" required>
+                <input type="text" class="form-control" name="profession">
+                <div class="invalid-feedback">Please provide your profession.</div>
               </div>            
               <div class="col-md-6 mb-3">
                 <label class="form-label">Preferred Work Type</label>
-                <select class="form-select" name="workType" required>
+                <select class="form-select" name="workType">
                   <option value="">Select</option>
                   <option>Full-time</option>
                   <option>Part-time</option>
                   <option>Gig/Short-term</option>
                 </select>
+                <div class="invalid-feedback">Please select your work type.</div>
               </div>
-             
               <div class="col-md-6 mb-3">
                 <label class="form-label">Preferred Language</label>
-                <select class="form-select" name="language" required>
+                <select class="form-select" name="language">
                   <option value="">Select</option>
                   <option>English</option>
                   <option>Swahili</option>
                   <option>Other</option>
                 </select>
+                <div class="invalid-feedback">Please select your preferred language.</div>
               </div>
             </div>
           </div>
@@ -124,39 +130,48 @@
             <div class="row">
               <div class="col-md-6 mb-3">
                 <label class="form-label">Contact Person Name</label>
-                <input type="text" class="form-control" name="contactPerson" required>
+                <input type="text" class="form-control" name="contactPerson">
+                <div class="invalid-feedback">Please provide contact person name.</div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Phone Number</label>
-                <input type="tel" class="form-control" name="employerPhone" required>
+                <input type="tel" class="form-control" name="employerPhone">
+                <div class="invalid-feedback">Please provide phone number.</div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Email</label>
-                <input type="email" class="form-control" name="employerEmail" required>
+                <input type="email" class="form-control" name="employerEmail">
+                <div class="invalid-feedback">Please provide email address.</div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Location</label>
-                <input type="text" class="form-control" name="employerLocation" required>
+                <input type="text" class="form-control" name="employerLocation">
+                <div class="invalid-feedback">Please provide location.</div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Type of Worker Needed</label>
-                <input type="text" class="form-control" name="workerType" required>
+                <input type="text" class="form-control" name="workerType">
+                <div class="invalid-feedback">Please specify worker type.</div>
               </div>
               <div class="col-md-12 mb-3">
                 <label class="form-label">Job Description</label>
-                <textarea class="form-control" name="jobDescription" rows="3" required></textarea>
+                <textarea class="form-control" name="jobDescription" rows="3"></textarea>
+                <div class="invalid-feedback">Please provide job description.</div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Duration of Work</label>
-                <input type="text" class="form-control" name="jobDuration" required>
+                <input type="text" class="form-control" name="jobDuration">
+                <div class="invalid-feedback">Please specify duration.</div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Pay / Budget Range</label>
-                <input type="text" class="form-control" name="payRange" required>
+                <input type="text" class="form-control" name="payRange">
+                <div class="invalid-feedback">Please provide pay range.</div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Preferred Start Date</label>
-                <input type="date" class="form-control" name="startDate" required>
+                <input type="date" class="form-control" name="startDate">
+                <div class="invalid-feedback">Please select start date.</div>
               </div>
               <div class="col-md-12 mb-3">
                 <label class="form-label">Special Requirements</label>
@@ -171,15 +186,18 @@
             <div class="row">
               <div class="col-md-6 mb-3">
                 <label class="form-label">Full Name</label>
-                <input type="text" class="form-control" name="reName" required>
+                <input type="text" class="form-control" name="reName">
+                <div class="invalid-feedback">Please provide your name.</div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Phone Number</label>
-                <input type="tel" class="form-control" name="rePhone" required>
+                <input type="tel" class="form-control" name="rePhone">
+                <div class="invalid-feedback">Please provide phone number.</div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Email</label>
-                <input type="email" class="form-control" name="reEmail" required>
+                <input type="email" class="form-control" name="reEmail">
+                <div class="invalid-feedback">Please provide email address.</div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Company/Agency (if applicable)</label>
@@ -191,21 +209,23 @@
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Years of Experience</label>
-                <select class="form-select" name="reExperience" required>
+                <select class="form-select" name="reExperience">
                   <option value="">Select</option>
                   <option>Less than 1 year</option>
                   <option>1-3 years</option>
                   <option>3-5 years</option>
                   <option>5+ years</option>
                 </select>
+                <div class="invalid-feedback">Please select experience level.</div>
               </div>
               <div class="col-md-12 mb-3">
                 <label class="form-label">Areas of Operation</label>
-                <textarea class="form-control" name="reAreas" rows="2" placeholder="List counties or neighborhoods you operate in" required></textarea>
+                <textarea class="form-control" name="reAreas" rows="2" placeholder="List counties or neighborhoods you operate in"></textarea>
+                <div class="invalid-feedback">Please specify areas of operation.</div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Specialization</label>
-                <select class="form-select" name="reSpecialization" required>
+                <select class="form-select" name="reSpecialization">
                   <option value="">Select</option>
                   <option>Residential Sales</option>
                   <option>Commercial Sales</option>
@@ -214,14 +234,17 @@
                   <option>Short-term Rentals</option>
                   <option>Other</option>
                 </select>
+                <div class="invalid-feedback">Please select specialization.</div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Average Property Price Range</label>
-                <input type="text" class="form-control" name="rePriceRange" placeholder="e.g. KES 2M - 5M" required>
+                <input type="text" class="form-control" name="rePriceRange" placeholder="e.g. KES 2M - 5M">
+                <div class="invalid-feedback">Please provide price range.</div>
               </div>
               <div class="col-md-12 mb-3">
                 <label class="form-label">Services Offered</label>
-                <textarea class="form-control" name="reServices" rows="2" placeholder="List your services (e.g. property valuation, listing, etc.)" required></textarea>
+                <textarea class="form-control" name="reServices" rows="2" placeholder="List your services (e.g. property valuation, listing, etc.)"></textarea>
+                <div class="invalid-feedback">Please describe services offered.</div>
               </div>
             </div>
           </div>
@@ -248,11 +271,83 @@
         jobSeekerFields.classList.toggle("hidden", type !== "Job Seeker");
         employerFields.classList.toggle("hidden", type !== "Employer");
         realEstateFields.classList.toggle("hidden", type !== "Real Estate");
+        
+        // Clear all validation states when switching types
+        document.querySelectorAll('.is-invalid').forEach(el => {
+          el.classList.remove('is-invalid');
+        });
       });
 
       userForm.addEventListener("submit", function(e) {
         e.preventDefault();
         
+        // Clear previous validation
+        document.querySelectorAll('.is-invalid').forEach(el => {
+          el.classList.remove('is-invalid');
+        });
+        
+        // Validate user type first
+        if (!userTypeSelect.value) {
+          userTypeSelect.classList.add('is-invalid');
+          statusDiv.innerHTML = `
+            <div class="alert-message alert-error">
+              <strong>Error!</strong> Please select a registration type.
+            </div>
+          `;
+          userTypeSelect.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          userTypeSelect.focus();
+          return;
+        }
+
+        // Validate visible fields only
+        const type = userTypeSelect.value;
+        let isValid = true;
+        let firstInvalidElement = null;
+
+        if (type === "Job Seeker") {
+          const requiredFields = jobSeekerFields.querySelectorAll('[required]');
+          requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+              isValid = false;
+              field.classList.add('is-invalid');
+              if (!firstInvalidElement) firstInvalidElement = field;
+            }
+          });
+        } 
+        else if (type === "Employer") {
+          const requiredFields = employerFields.querySelectorAll('[required]');
+          requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+              isValid = false;
+              field.classList.add('is-invalid');
+              if (!firstInvalidElement) firstInvalidElement = field;
+            }
+          });
+        } 
+        else if (type === "Real Estate") {
+          const requiredFields = realEstateFields.querySelectorAll('[required]');
+          requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+              isValid = false;
+              field.classList.add('is-invalid');
+              if (!firstInvalidElement) firstInvalidElement = field;
+            }
+          });
+        }
+
+        if (!isValid) {
+          statusDiv.innerHTML = `
+            <div class="alert-message alert-error">
+              <strong>Error!</strong> Please fill in all required fields.
+            </div>
+          `;
+          if (firstInvalidElement) {
+            firstInvalidElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            firstInvalidElement.focus();
+          }
+          return;
+        }
+
         submitBtn.disabled = true;
         submitBtn.textContent = "Submitting...";
         
@@ -289,7 +384,7 @@
         document.body.appendChild(form);
         form.submit();
         
-        // Show success message (since we can't get response from iframe)
+        // Show success message
         statusDiv.innerHTML = `
           <div class="alert-message alert-success">
             <strong>Success!</strong> Your submission has been received.
