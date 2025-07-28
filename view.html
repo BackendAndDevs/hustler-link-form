@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HustleLink User Registry</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <style>
+    :root {
+      --primary-bg: #0d6efd;
+      --active-color: #198754;
+      --inactive-color: #dc3545;
+    }
+    
+    body {
+      background-color: #f8f9fa;
+    }
+    
+    .card-header {
+      background-color: var(--primary-bg);
+    }
+    
+    .table thead th {
+      background-color: var(--primary-bg);
+      color: white;
+      vertical-align: middle;
+    }
+    
+    .table-hover tbody tr:hover {
+      background-color: rgba(13, 110, 253, 0.05);
+    }
+    
+    .serial-column {
+      width: 60px;
+      text-align: center;
+      font-weight: 500;
+    }
+    
+    .status-active {
+      color: var(--active-color);
+      font-weight: 500;
+    }
+    
+    .status-inactive {
+      color: var(--inactive-color);
+      font-weight: 500;
+    }
+    
+    .text-truncate {
+      max-width: 200px;
+    }
+    
+    .last-updated {
+      font-size: 0.85rem;
+    }
+    
+    .error-message {
+      padding: 2rem 0;
+    }
+    
+    .export-btn {
+      transition: all 0.2s ease;
+    }
+    
+    .export-btn:hover {
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-4 py-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-header text-white">
+        <div class="d-flex justify-content-between align-items-center">
+          <h2 class="h4 mb-0">
+            <i class="bi bi-people-fill me-2"></i>Registered Users
+          </h2>
+          <div>
+            <span id="recordCount" class="badge bg-white text-primary me-2"></span>
+            <button id="exportBtn" class="btn btn-sm btn-light export-btn" title="Export to CSV">
+              <i class="bi bi-download me-1"></i>Export
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover table-bordered mb-0">
+            <thead id="tableHead" class="align-middle">
+              <tr>
+                <th class="serial-column">#</th>
+                <!-- Dynamic headers will be inserted here -->
+              </tr>
+            </thead>
+            <tbody id="tableBody" class="align-middle"></tbody>
+          </table>
+        </div>
+      </div>
+      
+      <div class="card-footer text-muted">
+        <div class="d-flex justify-content-between align-items-center">
+          <small class="last-updated">
+            <i class="bi bi-clock-history me-1"></i>
+            Last updated: <span id="updateTime" class="fw-semibold"></span>
+          </small>
+          <small>
+            <span id="dataStatus" class="badge text-bg-light"></span>
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const config = {
+        apiEndpoint: 'https://script.google.com/macros/s/AKfycbzt5q5HORvhEW15w4-VCRHaBSepCzm3jc6aXNJCK3WwgPzYKKiNChy9FfL7bkBpVnL7/exec',
+        maxRetries: 3,
+        retryDelay: 1000
+      };
+      
+      // Cache DOM elements
+      const elements = {
+        tableHead: document.getElementById('tableHead'),
+        tableBody: document.getElementById('tableBody'),
+        updateTime: document.getElementById('updateTime'),
+        recordCount: document.getElementById('recordCount'),
+        dataStatus: document.getElementById('dataStatus'),
+        exportBtn: document.getElementById('exportBtn')
+      };
+      
+      // Store the current data for export
+      let currentData = [];
+      let currentHeaders = [];
+      
+      // Update timestamp display
+      function updateTimestamp() {
+        const now = new Date();
+        elements.updateTime.textContent = now.toLocaleString();
+        return now;
+      }
+      
+      // Display error message
+      function renderError(message) {
+        elements.tableBody.innerHTML = `
+          <tr>
+            <td colspan="20" class="text-center error-message text-danger">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              ${message}
+            </td>
+          </tr>`;
+        elements.dataStatus.textContent = 'Error';
+        elements.dataStatus.className = 'badge text-bg-danger';
+      }
+      
+      // Display no data message
+      function renderNoData() {
+        elements.tableBody.innerHTML = `
+          <tr>
+            <td colspan="20" class="text-center error-message text-muted">
+              <i class="bi bi-database-exclamation me-2"></i>
+              No records found
+            </td>
+          </tr>`;
+        elements.recordCount.textContent = '0 records';
+        elements.dataStatus.textContent = 'Empty';
+        elements.dataStatus.className = 'badge text-bg-warning';
+      }
+      
+      // Convert array to CSV format
+      function arrayToCSV(data, headers) {
+        const headerRow = headers.join(',');
+        const dataRows = data.map(row => 
+          headers.map(header => {
+            // Escape quotes and wrap in quotes if contains commas
+            let value = row[header] || '';
+            value = String(value).replace(/"/g, '""');
+            return value.includes(',') ? `"${value}"` : value;
+          }).join(',')
+        );
+        return [headerRow, ...dataRows].join('\n');
+      }
+      
+      // Download CSV file
+      function downloadCSV() {
+        if (!currentData.length) {
+          alert('No data available to export');
+          return;
+        }
+        
+        const csvContent = arrayToCSV(currentData, currentHeaders);
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const filename = `hustlelink-users-${timestamp}.csv`;
+        
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+      
+      // Render the data table
+      function renderTable(data) {
+        if (!data || !data.length) {
+          renderNoData();
+          return;
+        }
+        
+        currentData = data;
+        currentHeaders = Object.keys(data[0]);
+        
+        const headerHTML = currentHeaders.map(h => 
+          `<th class="text-nowrap">${h.replace(/_/g, ' ')}</th>`
+        ).join('');
+        
+        elements.tableHead.innerHTML = `<tr><th class="serial-column">#</th>${headerHTML}</tr>`;
+        
+        const bodyHTML = data.map((row, index) => {
+          const cells = currentHeaders.map(h => {
+            let content = row[h] || '';
+            
+            // Special formatting for status fields
+            if (h.toLowerCase().includes('status')) {
+              const statusClass = content.toLowerCase() === 'active' 
+                ? 'status-active' 
+                : 'status-inactive';
+              content = `<span class="${statusClass}">${content}</span>`;
+            }
+            
+            return `<td class="text-truncate" title="${content}">${content}</td>`;
+          }).join('');
+          
+          return `<tr>
+            <td class="serial-column">${index + 1}</td>
+            ${cells}
+          </tr>`;
+        }).join('');
+        
+        elements.tableBody.innerHTML = bodyHTML;
+        elements.recordCount.textContent = `${data.length} ${data.length === 1 ? 'record' : 'records'}`;
+        elements.dataStatus.textContent = 'Loaded';
+        elements.dataStatus.className = 'badge text-bg-success';
+      }
+      
+      // Fetch data from API
+      async function fetchData(retryCount = 0) {
+        try {
+          const response = await fetch(config.apiEndpoint);
+          
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          renderTable(data);
+          updateTimestamp();
+        } catch (error) {
+          console.error('Fetch error:', error);
+          
+          if (retryCount < config.maxRetries) {
+            console.log(`Retrying... (${retryCount + 1}/${config.maxRetries})`);
+            setTimeout(() => fetchData(retryCount + 1), config.retryDelay);
+          } else {
+            renderError('Failed to load data. Please try again later.');
+            updateTimestamp();
+          }
+        }
+      }
+      
+      // Initialize the application
+      function init() {
+        updateTimestamp();
+        elements.dataStatus.textContent = 'Loading...';
+        elements.dataStatus.className = 'badge text-bg-secondary';
+        
+        // Set up event listeners
+        elements.exportBtn.addEventListener('click', downloadCSV);
+        
+        // Initial data load
+        fetchData();
+        
+        // Refresh data every 5 minutes
+        setInterval(fetchData, 300000);
+      }
+      
+      init();
+    });
+  </script>
+  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
