@@ -56,6 +56,7 @@
               <option value="">Select...</option>
               <option value="Job Seeker">Job Seeker</option>
               <option value="Employer">Employer</option>
+              <option value="Real Estate">Real Estate Professional</option>
             </select>
           </div>
 
@@ -165,6 +166,67 @@
             </div>
           </div>
 
+          <!-- 🏠 REAL ESTATE SECTION -->
+          <div id="realEstateFields" class="hidden">
+            <h5 class="mt-4" style="color:#F25C05">Real Estate Professional Details</h5>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Full Name</label>
+                <input type="text" class="form-control" name="reName">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Phone Number</label>
+                <input type="tel" class="form-control" name="rePhone">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" name="reEmail">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Company/Agency (if applicable)</label>
+                <input type="text" class="form-control" name="reCompany">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">License Number (if applicable)</label>
+                <input type="text" class="form-control" name="reLicense">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Years of Experience</label>
+                <select class="form-select" name="reExperience">
+                  <option value="">Select</option>
+                  <option>Less than 1 year</option>
+                  <option>1-3 years</option>
+                  <option>3-5 years</option>
+                  <option>5+ years</option>
+                </select>
+              </div>
+              <div class="col-md-12 mb-3">
+                <label class="form-label">Areas of Operation</label>
+                <textarea class="form-control" name="reAreas" rows="2" placeholder="List counties or neighborhoods you operate in"></textarea>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Specialization</label>
+                <select class="form-select" name="reSpecialization">
+                  <option value="">Select</option>
+                  <option>Residential Sales</option>
+                  <option>Commercial Sales</option>
+                  <option>Property Management</option>
+                  <option>Land Brokerage</option>
+                  <option>Short-term Rentals</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Average Property Price Range</label>
+                <input type="text" class="form-control" name="rePriceRange" placeholder="e.g. KES 2M - 5M">
+              </div>
+              <div class="col-md-12 mb-3">
+                <label class="form-label">Services Offered</label>
+                <textarea class="form-control" name="reServices" rows="2" placeholder="List your services (e.g. property valuation, listing, etc.)"></textarea>
+              </div>
+            </div>
+          </div>
+
           <button type="submit" class="btn mt-3" id="submitBtn" style="background-color:#F25C05;color:#f5f5f5;font-weight:700">Submit</button>
           <div id="status" class="mt-3"></div>
         </form>
@@ -176,6 +238,7 @@
     const userTypeSelect = document.getElementById("userType");
     const jobSeekerFields = document.getElementById("jobSeekerFields");
     const employerFields = document.getElementById("employerFields");
+    const realEstateFields = document.getElementById("realEstateFields");
     const userForm = document.getElementById("userForm");
     const submitBtn = document.getElementById("submitBtn");
     const statusDiv = document.getElementById("status");
@@ -184,6 +247,7 @@
       const type = this.value;
       jobSeekerFields.classList.toggle("hidden", type !== "Job Seeker");
       employerFields.classList.toggle("hidden", type !== "Employer");
+      realEstateFields.classList.toggle("hidden", type !== "Real Estate");
     });
 
     userForm.addEventListener("submit", function(e) {
@@ -212,8 +276,6 @@
           submitBtn.textContent = "Submit";
         }, 3000);
       }, 1500);
-      
-     
     });
   </script>
   <script src="script.js"></script>
