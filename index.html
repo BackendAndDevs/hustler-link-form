@@ -235,59 +235,66 @@
   </div>
 
 <script>
-  const userForm = document.getElementById("user-form");
-  const submitBtn = document.getElementById("submit-btn");
-  const statusDiv = document.getElementById("form-status");
+  document.addEventListener("DOMContentLoaded", () => {
+    const userForm = document.getElementById("user-form");
+    const submitBtn = document.getElementById("submit-btn");
+    const statusDiv = document.getElementById("form-status");
 
-  userForm.addEventListener("submit", function (e) {
-    e.preventDefault();
+    if (!userForm) {
+      console.error("Form element with ID 'user-form' not found.");
+      return;
+    }
 
-    submitBtn.disabled = true;
-    submitBtn.textContent = "Submitting...";
+    userForm.addEventListener("submit", function (e) {
+      e.preventDefault();
 
-    const formData = new FormData(userForm);
-    const data = {};
-    formData.forEach((value, key) => {
-      data[key] = value;
-    });
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting...";
 
-    fetch("https://script.google.com/macros/s/AKfycbzt5q5HORvhEW15w4-VCRHaBSepCzm3jc6aXNJCK3WwgPzYKKiNChy9FfL7bkBpVnL7/exec", {
-      method: "POST",
-      body: JSON.stringify(data),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((response) => response.json())
-      .then((res) => {
-        if (res.status === "success") {
-          statusDiv.innerHTML = `
-            <div class="alert-message alert-success">
-              <strong>Success!</strong> Your registration has been submitted successfully.
-            </div>
-          `;
-          userForm.reset();
-        } else {
+      const formData = new FormData(userForm);
+      const data = {};
+      formData.forEach((value, key) => {
+        data[key] = value;
+      });
+
+      fetch("https://script.google.com/macros/s/YOUR_DEPLOYED_SCRIPT_URL/exec", {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+        .then((response) => response.json())
+        .then((res) => {
+          if (res.status === "success") {
+            statusDiv.innerHTML = `
+              <div class="alert-message alert-success">
+                <strong>Success!</strong> Your registration has been submitted successfully.
+              </div>
+            `;
+            userForm.reset();
+          } else {
+            statusDiv.innerHTML = `
+              <div class="alert-message alert-error">
+                <strong>Error!</strong> ${res.message}
+              </div>
+            `;
+          }
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Submit";
+          statusDiv.scrollIntoView({ behavior: 'smooth' });
+        })
+        .catch((error) => {
           statusDiv.innerHTML = `
             <div class="alert-message alert-error">
-              <strong>Error!</strong> ${res.message}
+              <strong>Error!</strong> ${error.message}
             </div>
           `;
-        }
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Submit";
-        statusDiv.scrollIntoView({ behavior: 'smooth' });
-      })
-      .catch((error) => {
-        statusDiv.innerHTML = `
-          <div class="alert-message alert-error">
-            <strong>Error!</strong> ${error.message}
-          </div>
-        `;
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Submit";
-        statusDiv.scrollIntoView({ behavior: 'smooth' });
-      });
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Submit";
+          statusDiv.scrollIntoView({ behavior: 'smooth' });
+        });
+    });
   });
 </script>
 
