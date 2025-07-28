@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Handle form submission
   if (form) {
-    form.addEventListener('submit', async function(e) {
+    form.addEventListener('submit', function(e) {
       e.preventDefault();
       
       // Disable submit button
@@ -34,23 +34,37 @@ document.addEventListener('DOMContentLoaded', function() {
         submitBtn.textContent = "Submitting...";
       }
 
-      try {
-        const formData = new FormData(form);
-        
-        // Add timestamp for debugging
-        formData.append('submissionTime', new Date().toISOString());
-        
-        const response = await fetch(scriptURL, {
-          method: 'POST',
-          body: formData,
-          redirect: 'follow'
-        });
+      // Create hidden iframe for form submission
+      const iframe = document.createElement('iframe');
+      iframe.name = 'hidden-iframe';
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
 
-        if (!response.ok) throw new Error('Network response was not ok');
-        
-        const result = await response.text();
-        console.log('Success:', result);
-        
+      // Create a form specifically for the iframe submission
+      const iframeForm = document.createElement('form');
+      iframeForm.action = scriptURL;
+      iframeForm.method = 'POST';
+      iframeForm.target = 'hidden-iframe';
+      iframeForm.style.display = 'none';
+
+      // Copy all form data to the new form
+      const formData = new FormData(form);
+      for (const [name, value] of formData.entries()) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = name;
+        input.value = value;
+        iframeForm.appendChild(input);
+      }
+
+      document.body.appendChild(iframeForm);
+      
+      // Submit the form through the iframe
+      iframeForm.submit();
+
+      // Set a timeout to check for completion
+      setTimeout(() => {
+        // Show success message
         if (status) {
           status.innerHTML = `
             <div class="alert-message alert-success">
@@ -65,21 +79,17 @@ document.addEventListener('DOMContentLoaded', function() {
         Object.values(formSections).forEach(section => {
           if (section) section.classList.add('hidden');
         });
-      } catch (error) {
-        console.error('Error:', error);
-        if (status) {
-          status.innerHTML = `
-            <div class="alert-message alert-error">
-              <strong>Error!</strong> ${error.message || 'Submission failed'}
-            </div>
-          `;
-        }
-      } finally {
+
+        // Clean up
+        document.body.removeChild(iframe);
+        document.body.removeChild(iframeForm);
+
+        // Re-enable submit button
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.textContent = "Submit";
         }
-      }
+      }, 2000); // 2 second delay to allow submission to complete
     });
   }
 });
