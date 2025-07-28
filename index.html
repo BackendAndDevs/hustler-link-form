@@ -235,67 +235,84 @@
   </div>
 
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const userForm = document.getElementById("user-form");
-    const submitBtn = document.getElementById("submit-btn");
-    const statusDiv = document.getElementById("form-status");
+document.addEventListener("DOMContentLoaded", () => {
+    // Get all form elements - make sure these match your HTML IDs exactly
+    const userTypeSelect = document.getElementById("userType");
+    const jobSeekerFields = document.getElementById("jobSeekerFields");
+    const employerFields = document.getElementById("employerFields");
+    const realEstateFields = document.getElementById("realEstateFields");
+    const userForm = document.getElementById("userForm"); // Changed from 'user-form'
+    const submitBtn = document.getElementById("submitBtn"); // Changed from 'submit-btn'
+    const statusDiv = document.getElementById("status"); // Changed from 'form-status'
 
-    if (!userForm) {
-      console.error("Form element with ID 'user-form' not found.");
-      return;
+    // Check if elements exist before adding event listeners
+    if (!userTypeSelect || !jobSeekerFields || !employerFields || !realEstateFields || !userForm || !submitBtn || !statusDiv) {
+        console.error("One or more form elements not found");
+        return;
     }
 
-    userForm.addEventListener("submit", function (e) {
-      e.preventDefault();
+    // Show/hide form sections based on user type
+    userTypeSelect.addEventListener("change", function () {
+        const type = this.value;
+        jobSeekerFields.classList.toggle("hidden", type !== "Job Seeker");
+        employerFields.classList.toggle("hidden", type !== "Employer");
+        realEstateFields.classList.toggle("hidden", type !== "Real Estate");
+    });
 
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Submitting...";
+    // Handle form submission
+    userForm.addEventListener("submit", function(e) {
+        e.preventDefault();
+        
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Submitting...";
 
-      const formData = new FormData(userForm);
-      const data = {};
-      formData.forEach((value, key) => {
-        data[key] = value;
-      });
+        const formData = new FormData(userForm);
+        const data = {};
+        formData.forEach((value, key) => {
+            data[key] = value;
+        });
 
-      fetch("https://script.google.com/macros/s/YOUR_DEPLOYED_SCRIPT_URL/exec", {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-        .then((response) => response.json())
-        .then((res) => {
-          if (res.status === "success") {
-            statusDiv.innerHTML = `
-              <div class="alert-message alert-success">
-                <strong>Success!</strong> Your registration has been submitted successfully.
-              </div>
-            `;
-            userForm.reset();
-          } else {
-            statusDiv.innerHTML = `
-              <div class="alert-message alert-error">
-                <strong>Error!</strong> ${res.message}
-              </div>
-            `;
-          }
-          submitBtn.disabled = false;
-          submitBtn.textContent = "Submit";
-          statusDiv.scrollIntoView({ behavior: 'smooth' });
+        // Replace with your actual Google Apps Script URL
+        const scriptUrl = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
+        
+        fetch(scriptUrl, {
+            method: "POST",
+            body: JSON.stringify(data),
+            headers: {
+                "Content-Type": "application/json",
+            },
         })
-        .catch((error) => {
-          statusDiv.innerHTML = `
-            <div class="alert-message alert-error">
-              <strong>Error!</strong> ${error.message}
-            </div>
-          `;
-          submitBtn.disabled = false;
-          submitBtn.textContent = "Submit";
-          statusDiv.scrollIntoView({ behavior: 'smooth' });
+        .then(response => response.json())
+        .then(res => {
+            if (res.status === "success") {
+                statusDiv.innerHTML = `
+                    <div class="alert-message alert-success">
+                        <strong>Success!</strong> ${res.message}
+                    </div>
+                `;
+                userForm.reset();
+            } else {
+                statusDiv.innerHTML = `
+                    <div class="alert-message alert-error">
+                        <strong>Error!</strong> ${res.message}
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            statusDiv.innerHTML = `
+                <div class="alert-message alert-error">
+                    <strong>Error!</strong> ${error.message}
+                </div>
+            `;
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Submit";
+            statusDiv.scrollIntoView({ behavior: 'smooth' });
         });
     });
-  });
+});
 </script>
 
   <script src="script.js"></script>
