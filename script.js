@@ -34,37 +34,34 @@ document.addEventListener('DOMContentLoaded', function() {
         submitBtn.textContent = "Submitting...";
       }
 
-      // Create hidden iframe for form submission
+      // Create a temporary form for submission
+      const tempForm = document.createElement('form');
+      tempForm.action = scriptURL;
+      tempForm.method = 'POST';
+      tempForm.style.display = 'none';
+      
+      // Create hidden iframe target
       const iframe = document.createElement('iframe');
-      iframe.name = 'hidden-iframe';
+      iframe.name = 'form-submission-iframe';
       iframe.style.display = 'none';
       document.body.appendChild(iframe);
+      tempForm.target = 'form-submission-iframe';
 
-      // Create a form specifically for the iframe submission
-      const iframeForm = document.createElement('form');
-      iframeForm.action = scriptURL;
-      iframeForm.method = 'POST';
-      iframeForm.target = 'hidden-iframe';
-      iframeForm.style.display = 'none';
-
-      // Copy all form data to the new form
+      // Add all form data to the temporary form
       const formData = new FormData(form);
       for (const [name, value] of formData.entries()) {
         const input = document.createElement('input');
         input.type = 'hidden';
         input.name = name;
         input.value = value;
-        iframeForm.appendChild(input);
+        tempForm.appendChild(input);
       }
 
-      document.body.appendChild(iframeForm);
-      
-      // Submit the form through the iframe
-      iframeForm.submit();
+      document.body.appendChild(tempForm);
+      tempForm.submit();
 
-      // Set a timeout to check for completion
+      // Show success message after short delay
       setTimeout(() => {
-        // Show success message
         if (status) {
           status.innerHTML = `
             <div class="alert-message alert-success">
@@ -81,15 +78,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // Clean up
+        document.body.removeChild(tempForm);
         document.body.removeChild(iframe);
-        document.body.removeChild(iframeForm);
 
         // Re-enable submit button
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.textContent = "Submit";
         }
-      }, 2000); // 2 second delay to allow submission to complete
+      }, 1500); // 1.5 second delay to allow submission to complete
     });
   }
 });
