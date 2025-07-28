@@ -246,48 +246,76 @@
   </div>
 
   <script>
-    const userTypeSelect = document.getElementById("userType");
-    const jobSeekerFields = document.getElementById("jobSeekerFields");
-    const employerFields = document.getElementById("employerFields");
-    const realEstateFields = document.getElementById("realEstateFields");
-    const userForm = document.getElementById("userForm");
-    const submitBtn = document.getElementById("submitBtn");
-    const statusDiv = document.getElementById("status");
+const scriptURL = 'https://script.google.com/macros/s/AKfycbywRcIxjn8drmUHYOBcGHAZ7eyoYhZ22BXbLQbpjHl8n4sUx3uH8eN9yBnuofRnDL5c/exec';
+const form = document.getElementById('userForm');
+const status = document.getElementById('status');
+const submitBtn = document.getElementById('submitBtn');
+const userTypeSelect = document.getElementById('userType');
 
-    userTypeSelect.addEventListener("change", function () {
-      const type = this.value;
-      jobSeekerFields.classList.toggle("hidden", type !== "Job Seeker");
-      employerFields.classList.toggle("hidden", type !== "Employer");
-      realEstateFields.classList.toggle("hidden", type !== "Real Estate");
-    });
+// Get all form sections (use null checks to prevent errors)
+const jobSeekerFields = document.getElementById('jobSeekerFields');
+const employerFields = document.getElementById('employerFields');
+const realEstateFields = document.getElementById('realEstateFields');
 
-    userForm.addEventListener("submit", function(e) {
-      e.preventDefault();
-      
-      // Disable the submit button
+// Handle user type selection changes
+if (userTypeSelect) {
+  userTypeSelect.addEventListener('change', function() {
+    const type = this.value;
+    
+    // Safely toggle sections (check if elements exist first)
+    if (jobSeekerFields) jobSeekerFields.classList.toggle('hidden', type !== 'Job Seeker');
+    if (employerFields) employerFields.classList.toggle('hidden', type !== 'Employer');
+    if (realEstateFields) realEstateFields.classList.toggle('hidden', type !== 'Real Estate');
+  });
+}
+
+// Handle form submission
+if (form) {
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Disable submit button during submission
+    if (submitBtn) {
       submitBtn.disabled = true;
       submitBtn.textContent = "Submitting...";
-      
-      // Simulate form submission (replace with actual AJAX call)
-      setTimeout(() => {
-        // Show success message
-        statusDiv.innerHTML = `
-          <div class="alert-message alert-success">
-            <strong>Success!</strong> Your registration has been submitted successfully.
-          </div>
-        `;
+    }
+
+    fetch(scriptURL, { method: 'POST', body: new FormData(form) })
+      .then(response => {
+        if (status) {
+          status.innerHTML = `
+            <div class="alert-message alert-success">
+              <strong>Success!</strong> Your registration has been submitted successfully.
+            </div>
+          `;
+          status.scrollIntoView({ behavior: 'smooth' });
+        }
         
-        // Scroll to the status message
-        statusDiv.scrollIntoView({ behavior: 'smooth' });
-        
-        // Reset form after 3 seconds (optional)
-        setTimeout(() => {
-          userForm.reset();
+        // Reset form and hide sections
+        form.reset();
+        if (jobSeekerFields) jobSeekerFields.classList.add('hidden');
+        if (employerFields) employerFields.classList.add('hidden');
+        if (realEstateFields) realEstateFields.classList.add('hidden');
+      })
+      .catch(error => {
+        if (status) {
+          status.innerHTML = `
+            <div class="alert-message alert-error">
+              <strong>Error!</strong> Submission failed. Please try again.
+            </div>
+          `;
+        }
+        console.error('Error!', error.message);
+      })
+      .finally(() => {
+        // Re-enable submit button
+        if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.textContent = "Submit";
-        }, 3000);
-      }, 1500);
-    });
+        }
+      });
+  });
+}
   </script>
   <script src="script.js"></script>
 </body>
