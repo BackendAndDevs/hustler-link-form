@@ -235,84 +235,80 @@
   </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-    // Get all form elements - make sure these match your HTML IDs exactly
-    const userTypeSelect = document.getElementById("userType");
-    const jobSeekerFields = document.getElementById("jobSeekerFields");
-    const employerFields = document.getElementById("employerFields");
-    const realEstateFields = document.getElementById("realEstateFields");
-    const userForm = document.getElementById("userForm"); // Changed from 'user-form'
-    const submitBtn = document.getElementById("submitBtn"); // Changed from 'submit-btn'
-    const statusDiv = document.getElementById("status"); // Changed from 'form-status'
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+      const userTypeSelect = document.getElementById("userType");
+      const jobSeekerFields = document.getElementById("jobSeekerFields");
+      const employerFields = document.getElementById("employerFields");
+      const realEstateFields = document.getElementById("realEstateFields");
+      const userForm = document.getElementById("userForm");
+      const submitBtn = document.getElementById("submitBtn");
+      const statusDiv = document.getElementById("status");
 
-    // Check if elements exist before adding event listeners
-    if (!userTypeSelect || !jobSeekerFields || !employerFields || !realEstateFields || !userForm || !submitBtn || !statusDiv) {
-        console.error("One or more form elements not found");
-        return;
-    }
+      if (!userTypeSelect || !jobSeekerFields || !employerFields || !realEstateFields || !userForm || !submitBtn || !statusDiv) {
+          console.error("One or more form elements not found");
+          return;
+      }
 
-    // Show/hide form sections based on user type
-    userTypeSelect.addEventListener("change", function () {
-        const type = this.value;
-        jobSeekerFields.classList.toggle("hidden", type !== "Job Seeker");
-        employerFields.classList.toggle("hidden", type !== "Employer");
-        realEstateFields.classList.toggle("hidden", type !== "Real Estate");
-    });
+      userTypeSelect.addEventListener("change", function () {
+          const type = this.value;
+          jobSeekerFields.classList.toggle("hidden", type !== "Job Seeker");
+          employerFields.classList.toggle("hidden", type !== "Employer");
+          realEstateFields.classList.toggle("hidden", type !== "Real Estate");
+      });
 
-    // Handle form submission
-    userForm.addEventListener("submit", function(e) {
-        e.preventDefault();
-        
-        submitBtn.disabled = true;
-        submitBtn.textContent = "Submitting...";
+      userForm.addEventListener("submit", function(e) {
+          e.preventDefault();
 
-        const formData = new FormData(userForm);
-        const data = {};
-        formData.forEach((value, key) => {
-            data[key] = value;
-        });
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Submitting...";
 
-        // Replace with your actual Google Apps Script URL
-        const scriptUrl = "https://script.google.com/macros/s/AKfycbxY3Be8inTxy96dumZT-OB-0-YMbk8Rm1NDLtpvaE41zy9xjLRkjp1r-ZcGQhsTQ8bw/exec";
-        
-        fetch(scriptUrl, {
-            method: "POST",
-            body: JSON.stringify(data),
-            headers: {
-                "Content-Type": "application/json",
-            },
-        })
-        .then(response => response.json())
-        .then(res => {
-            if (res.status === "success") {
-                statusDiv.innerHTML = `
-                    <div class="alert-message alert-success">
-                        <strong>Success!</strong> ${res.message}
-                    </div>
-                `;
-                userForm.reset();
-            } else {
-                statusDiv.innerHTML = `
-                    <div class="alert-message alert-error">
-                        <strong>Error!</strong> ${res.message}
-                    </div>
-                `;
-            }
-        })
-        .catch(error => {
-            statusDiv.innerHTML = `
-                <div class="alert-message alert-error">
-                    <strong>Error!</strong> ${error.message}
-                </div>
-            `;
-        })
-        .finally(() => {
-            submitBtn.disabled = false;
-            submitBtn.textContent = "Submit";
-            statusDiv.scrollIntoView({ behavior: 'smooth' });
-        });
-    });
-});
-</script>
+          const formData = new FormData(userForm);
+          const data = {};
+          formData.forEach((value, key) => {
+              data[key] = value;
+          });
+
+          const scriptUrl = "https://script.google.com/macros/s/AKfycbxY3Be8inTxy96dumZT-OB-0-YMbk8Rm1NDLtpvaE41zy9xjLRkjp1r-ZcGQhsTQ8bw/exec";
+
+          fetch(scriptUrl, {
+              method: "POST",
+              body: JSON.stringify(data),
+              headers: {
+                  "Content-Type": "application/json",
+              },
+          })
+          .then(response => response.json())
+          .then(res => {
+              if (res.status === "success") {
+                  statusDiv.innerHTML = `
+                      <div class="alert-message alert-success">
+                          <strong>Success!</strong> ${res.message}
+                      </div>
+                  `;
+                  userForm.reset();
+              } else {
+                  statusDiv.innerHTML = `
+                      <div class="alert-message alert-error">
+                          <strong>Error!</strong> ${res.message}
+                      </div>
+                  `;
+              }
+          })
+          .catch(error => {
+              statusDiv.innerHTML = `
+                  <div class="alert-message alert-error">
+                      <strong>Error!</strong> ${error.message}
+                  </div>
+              `;
+          })
+          .finally(() => {
+              submitBtn.disabled = false;
+              submitBtn.textContent = "Submit";
+              statusDiv.scrollIntoView({ behavior: 'smooth' });
+          });
+      });
+  });
+  </script>
 </body>
 </html>
