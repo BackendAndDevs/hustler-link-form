@@ -234,50 +234,63 @@
     </div>
   </div>
 
-  <script>
-    const userTypeSelect = document.getElementById("userType");
-    const jobSeekerFields = document.getElementById("jobSeekerFields");
-    const employerFields = document.getElementById("employerFields");
-    const realEstateFields = document.getElementById("realEstateFields");
-    const userForm = document.getElementById("userForm");
-    const submitBtn = document.getElementById("submitBtn");
-    const statusDiv = document.getElementById("status");
+<script>
+  const userForm = document.getElementById("user-form");
+  const submitBtn = document.getElementById("submit-btn");
+  const statusDiv = document.getElementById("form-status");
 
-    userTypeSelect.addEventListener("change", function () {
-      const type = this.value;
-      jobSeekerFields.classList.toggle("hidden", type !== "Job Seeker");
-      employerFields.classList.toggle("hidden", type !== "Employer");
-      realEstateFields.classList.toggle("hidden", type !== "Real Estate");
+  userForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Submitting...";
+
+    const formData = new FormData(userForm);
+    const data = {};
+    formData.forEach((value, key) => {
+      data[key] = value;
     });
 
-    userForm.addEventListener("submit", function(e) {
-      e.preventDefault();
-      
-      // Disable the submit button
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Submitting...";
-      
-      // Simulate form submission (replace with actual AJAX call)
-      setTimeout(() => {
-        // Show success message
+    fetch("https://script.google.com/macros/s/YOUR_DEPLOYED_SCRIPT_URL/exec", {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((res) => {
+        if (res.status === "success") {
+          statusDiv.innerHTML = `
+            <div class="alert-message alert-success">
+              <strong>Success!</strong> Your registration has been submitted successfully.
+            </div>
+          `;
+          userForm.reset();
+        } else {
+          statusDiv.innerHTML = `
+            <div class="alert-message alert-error">
+              <strong>Error!</strong> ${res.message}
+            </div>
+          `;
+        }
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit";
+        statusDiv.scrollIntoView({ behavior: 'smooth' });
+      })
+      .catch((error) => {
         statusDiv.innerHTML = `
-          <div class="alert-message alert-success">
-            <strong>Success!</strong> Your registration has been submitted successfully.
+          <div class="alert-message alert-error">
+            <strong>Error!</strong> ${error.message}
           </div>
         `;
-        
-        // Scroll to the status message
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit";
         statusDiv.scrollIntoView({ behavior: 'smooth' });
-        
-        // Reset form after 3 seconds (optional)
-        setTimeout(() => {
-          userForm.reset();
-          submitBtn.disabled = false;
-          submitBtn.textContent = "Submit";
-        }, 3000);
-      }, 1500);
-    });
-  </script>
+      });
+  });
+</script>
+
   <script src="script.js"></script>
 </body>
 </html>
