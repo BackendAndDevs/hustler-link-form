@@ -13,6 +13,7 @@ document.getElementById('userForm').addEventListener('submit', function(e) {
       form.reset();
       document.getElementById("jobSeekerFields").classList.add("hidden");
       document.getElementById("employerFields").classList.add("hidden");
+      document.getElementById("realestateFields").classList.add("hidden");
     })
     .catch(error => {
       status.textContent = "❌ Submission failed.";
