@@ -1,6 +1,6 @@
 const scriptURL = 'https://script.google.com/macros/s/AKfycbyBKsURnjHmLjxKJPdsEXod-_gpFCX_6r6HowZonUCBWVe8eoTXu1BWd2lZt-5MsN_6WQ/exec';
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('userForm');
   const status = document.getElementById('status');
   const submitBtn = document.getElementById('submitBtn');
@@ -12,18 +12,18 @@ document.addEventListener('DOMContentLoaded', function() {
     'Real Estate': document.getElementById('realEstateFields')
   };
 
-  // Show only relevant section
+  // Show relevant fields based on selected user type
   if (userTypeSelect) {
-    userTypeSelect.addEventListener('change', function() {
+    userTypeSelect.addEventListener('change', function () {
       const type = this.value;
       Object.entries(formSections).forEach(([key, section]) => {
-        if (section) section.classList.toggle('hidden', key !== type);
+        section.classList.toggle('hidden', key !== type);
       });
     });
   }
 
   if (form) {
-    form.addEventListener('submit', function(e) {
+    form.addEventListener('submit', async function (e) {
       e.preventDefault();
 
       // Disable button during submission
@@ -32,60 +32,53 @@ document.addEventListener('DOMContentLoaded', function() {
         submitBtn.textContent = "Submitting...";
       }
 
-      // Create hidden iframe
-      const iframe = document.createElement('iframe');
-      iframe.name = 'hidden-iframe';
-      iframe.style.display = 'none';
-      document.body.appendChild(iframe);
-
-      // Create form for iframe submission
-      const iframeForm = document.createElement('form');
-      iframeForm.action = scriptURL;
-      iframeForm.method = 'POST';
-      iframeForm.target = 'hidden-iframe';
-      iframeForm.style.display = 'none';
-
-      // Capture form data (including checkboxes with same name)
+      // Collect all form data
       const formData = new FormData(form);
-      const fieldNames = new Set([...formData.keys()]);
-      for (const name of fieldNames) {
+      const data = {};
+
+      for (const name of new Set([...formData.keys()])) {
         const values = formData.getAll(name);
-        for (const value of values) {
-          const input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = name;
-          input.value = value;
-          iframeForm.appendChild(input);
-        }
+        data[name] = values.length > 1 ? values : values[0];
       }
 
-      document.body.appendChild(iframeForm);
-      iframeForm.submit();
+      try {
+        const response = await fetch(scriptURL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
 
-      // Wait and reset
-      setTimeout(() => {
-        if (status) {
+        const result = await response.json();
+
+        if (result.status === 'success') {
           status.innerHTML = `
             <div class="alert-message alert-success">
               <strong>Success!</strong> Your registration has been submitted.
             </div>
           `;
-          status.scrollIntoView({ behavior: 'smooth' });
+        } else {
+          throw new Error(result.message || "Unknown error");
         }
-
+      } catch (error) {
+        console.error("Submission failed:", error);
+        status.innerHTML = `
+          <div class="alert-message alert-error">
+            <strong>Error:</strong> ${error.message}
+          </div>
+        `;
+      } finally {
         form.reset();
-        Object.values(formSections).forEach(section => {
-          if (section) section.classList.add('hidden');
-        });
-
-        document.body.removeChild(iframe);
-        document.body.removeChild(iframeForm);
+        Object.values(formSections).forEach(section => section.classList.add('hidden'));
 
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.textContent = "Submit";
         }
-      }, 2000); // delay to allow Google Apps Script to process
+
+        status.scrollIntoView({ behavior: 'smooth' });
+      }
     });
   }
 });
