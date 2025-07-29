@@ -1,80 +1,83 @@
 const scriptURL = 'https://script.google.com/macros/s/AKfycbxoLiXSF3eh7WxtvoCeoy26s8dmtjhzUHXKd28J47UHawKMYLWVF_Gmwi9UUNmlou7o/exec';
 
-document.addEventListener('DOMContentLoaded', function() {
-  // [Your existing DOMContentLoaded code remains the same until the form submission...]
+document.addEventListener('DOMContentLoaded', function () {
+  const form = document.getElementById('userForm');
+  const status = document.getElementById('status');
+  const submitBtn = document.getElementById('submitBtn');
 
-  if (form) {
-    form.addEventListener('submit', async function(e) {
-      e.preventDefault();
-      
-      // Disable submit button
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.textContent = "Submitting...";
-      }
+  const formSections = {
+    'Job Seeker': document.getElementById('jobSeekerFields'),
+    'Employer': document.getElementById('employerFields'),
+    'Real Estate': document.getElementById('realEstateFields')
+  };
 
-      try {
-        // Convert form data to object
-        const formData = new FormData(form);
-        const data = {};
-        formData.forEach((value, key) => {
-          // Handle checkbox groups
-          if (key === 'reServices') {
-            if (!data[key]) data[key] = [];
-            data[key].push(value);
-          } else {
-            data[key] = value;
-          }
-        });
+  if (!form) return;
 
-        // First make an OPTIONS request for CORS preflight
-        await fetch(scriptURL, {
-          method: 'OPTIONS',
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        });
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
 
-        // Then make the actual POST request
-        const response = await fetch(scriptURL, {
-          method: 'POST',
-          mode: 'no-cors', // Important for Google Apps Script
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data)
-        });
+    // Disable submit button
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting...";
+    }
 
-        // Since we're using no-cors mode, we can't read the response directly
-        // So we'll assume success if we get this far
+    try {
+      const formData = new FormData(form);
+      const data = {};
+
+      formData.forEach((value, key) => {
+        if (key === 'reServices') {
+          if (!data[key]) data[key] = [];
+          data[key].push(value);
+        } else {
+          data[key] = value;
+        }
+      });
+
+      const response = await fetch(scriptURL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (response.ok) {
+        const result = await response.json(); // Only works if Apps Script sends JSON
         status.innerHTML = `
           <div class="alert-message alert-success">
-            <strong>Success!</strong> Your registration has been submitted.
+            <strong>Success!</strong> ${result.message || "Your registration has been submitted."}
           </div>
         `;
-        status.scrollIntoView({ behavior: 'smooth' });
-        
-        // Reset form
-        form.reset();
-        Object.values(formSections).forEach(section => {
-          if (section) section.classList.add('hidden');
-        });
-
-      } catch (error) {
+      } else {
         status.innerHTML = `
           <div class="alert-message alert-error">
-            <strong>Error!</strong> ${error.message}
+            <strong>Submission failed.</strong> Please try again later.
           </div>
         `;
-        status.scrollIntoView({ behavior: 'smooth' });
-        console.error('Error!', error.message);
-      } finally {
-        // Re-enable submit button
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.textContent = "Submit";
-        }
       }
-    });
-  }
+
+      status.scrollIntoView({ behavior: 'smooth' });
+      form.reset();
+      Object.values(formSections).forEach(section => {
+        if (section) section.classList.add('hidden');
+      });
+
+    } catch (error) {
+      status.innerHTML = `
+        <div class="alert-message alert-error">
+          <strong>Error!</strong> ${error.message}
+        </div>
+      `;
+      console.error('Submission Error:', error);
+      status.scrollIntoView({ behavior: 'smooth' });
+
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit";
+      }
+    }
+  });
 });
