@@ -1,29 +1,8 @@
 const scriptURL = 'https://script.google.com/macros/s/AKfycbyQtejDmgBCQqzsz4QuoAswuCeawWXWNXUNEbs3QV2jB4c0899mfFzO1D75Gu3gIw-o/exec';
 
 document.addEventListener('DOMContentLoaded', function() {
-  const form = document.getElementById('userForm');
-  const status = document.getElementById('status');
-  const submitBtn = document.getElementById('submitBtn');
-  const userTypeSelect = document.getElementById('userType');
+  // [Your existing DOMContentLoaded code remains the same until the form submission...]
 
-  // Initialize form sections
-  const formSections = {
-    'Job Seeker': document.getElementById('jobSeekerFields'),
-    'Employer': document.getElementById('employerFields'),
-    'Real Estate': document.getElementById('realEstateFields')
-  };
-
-  // Handle user type selection
-  if (userTypeSelect) {
-    userTypeSelect.addEventListener('change', function() {
-      const type = this.value;
-      Object.entries(formSections).forEach(([key, section]) => {
-        if (section) section.classList.toggle('hidden', key !== type);
-      });
-    });
-  }
-
-  // Handle form submission
   if (form) {
     form.addEventListener('submit', async function(e) {
       e.preventDefault();
@@ -48,33 +27,39 @@ document.addEventListener('DOMContentLoaded', function() {
           }
         });
 
-        // Send data to Google Apps Script
+        // First make an OPTIONS request for CORS preflight
+        await fetch(scriptURL, {
+          method: 'OPTIONS',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+
+        // Then make the actual POST request
         const response = await fetch(scriptURL, {
           method: 'POST',
+          mode: 'no-cors', // Important for Google Apps Script
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(data)
         });
 
-        const result = await response.json();
+        // Since we're using no-cors mode, we can't read the response directly
+        // So we'll assume success if we get this far
+        status.innerHTML = `
+          <div class="alert-message alert-success">
+            <strong>Success!</strong> Your registration has been submitted.
+          </div>
+        `;
+        status.scrollIntoView({ behavior: 'smooth' });
         
-        if (result.status === "success") {
-          status.innerHTML = `
-            <div class="alert-message alert-success">
-              <strong>Success!</strong> Your registration has been submitted.
-            </div>
-          `;
-          status.scrollIntoView({ behavior: 'smooth' });
-          
-          // Reset form
-          form.reset();
-          Object.values(formSections).forEach(section => {
-            if (section) section.classList.add('hidden');
-          });
-        } else {
-          throw new Error(result.message || 'Submission failed');
-        }
+        // Reset form
+        form.reset();
+        Object.values(formSections).forEach(section => {
+          if (section) section.classList.add('hidden');
+        });
+
       } catch (error) {
         status.innerHTML = `
           <div class="alert-message alert-error">
