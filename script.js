@@ -1,4 +1,4 @@
-const scriptURL = 'https://script.google.com/macros/s/AKfycbyQtejDmgBCQqzsz4QuoAswuCeawWXWNXUNEbs3QV2jB4c0899mfFzO1D75Gu3gIw-o/exec';
+const scriptURL = 'https://script.google.com/macros/s/AKfycbxoLiXSF3eh7WxtvoCeoy26s8dmtjhzUHXKd28J47UHawKMYLWVF_Gmwi9UUNmlou7o/exec';
 
 document.addEventListener('DOMContentLoaded', function() {
   // [Your existing DOMContentLoaded code remains the same until the form submission...]
