@@ -24,6 +24,16 @@
       color: #721c24;
       border: 1px solid #f5c6cb;
     }
+    .is-invalid {
+      border-color: #dc3545 !important;
+    }
+    .is-invalid:focus {
+      box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25) !important;
+    }
+    .invalid-feedback {
+      color: #dc3545;
+      font-size: 0.875em;
+    }
   </style>
 </head>
 <body class="bg-light">
@@ -41,7 +51,7 @@
           From <strong>mama fuas</strong> to <strong>boda riders</strong>, <strong>street barbers</strong>, <strong>mjengo hands</strong>, <strong>mitumba sorters</strong>, <strong>water vendors</strong>, <strong>hawkers</strong>, and <strong>online hustlers</strong>, we help hustlers build income, trust, and growth – no CV, no barriers.
         </p>
 
-        <form id="userForm">
+        <form id="userForm" novalidate>
           <div class="mb-3">
             <label for="userType" class="form-label">I am registering as:</label>
             <select class="form-select" id="userType" name="userType" required>
@@ -58,11 +68,13 @@
             <div class="row">
               <div class="col-md-6 mb-3">
                 <label class="form-label">Full Name</label>
-                <input type="text" class="form-control" name="name" required>
+                <input type="text" class="form-control" name="name">
+                <div class="invalid-feedback">Please provide your full name</div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Phone Number</label>
-                <input type="tel" class="form-control" name="phone" required>
+                <input type="tel" class="form-control" name="phone">
+                <div class="invalid-feedback">Please provide your phone number</div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Email</label>
@@ -83,20 +95,23 @@
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Location / County</label>
-                <input type="text" class="form-control" name="location" required>
+                <input type="text" class="form-control" name="location">
+                <div class="invalid-feedback">Please provide your location</div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Profession / Work Type</label>
-                <input type="text" class="form-control" name="profession" required>
+                <input type="text" class="form-control" name="profession">
+                <div class="invalid-feedback">Please provide your profession</div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Preferred Work Type</label>
-                <select class="form-select" name="workType" required>
+                <select class="form-select" name="workType">
                   <option value="">Select</option>
                   <option>Full-time</option>
                   <option>Part-time</option>
                   <option>Gig/Short-term</option>
                 </select>
+                <div class="invalid-feedback">Please select work type</div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Preferred Language</label>
@@ -116,15 +131,18 @@
             <div class="row">
               <div class="col-md-6 mb-3">
                 <label class="form-label">Company/Individual Name</label>
-                <input type="text" class="form-control" name="employerName" required>
+                <input type="text" class="form-control" name="employerName">
+                <div class="invalid-feedback">Please provide company/individual name</div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Contact Person Name</label>
-                <input type="text" class="form-control" name="contactPerson" required>
+                <input type="text" class="form-control" name="contactPerson">
+                <div class="invalid-feedback">Please provide contact person</div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Phone Number</label>
-                <input type="tel" class="form-control" name="employerPhone" required>
+                <input type="tel" class="form-control" name="employerPhone">
+                <div class="invalid-feedback">Please provide phone number</div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Email</label>
@@ -132,15 +150,18 @@
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Location</label>
-                <input type="text" class="form-control" name="employerLocation" required>
+                <input type="text" class="form-control" name="employerLocation">
+                <div class="invalid-feedback">Please provide location</div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Type of Worker Needed</label>
-                <input type="text" class="form-control" name="workerProfession" required>
+                <input type="text" class="form-control" name="workerProfession">
+                <div class="invalid-feedback">Please specify worker type</div>
               </div>
               <div class="col-md-12 mb-3">
                 <label class="form-label">Job Description</label>
-                <textarea class="form-control" name="jobDescription" rows="3" required></textarea>
+                <textarea class="form-control" name="jobDescription" rows="3"></textarea>
+                <div class="invalid-feedback">Please provide job description</div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Duration of Work</label>
@@ -167,11 +188,13 @@
             <div class="row">
               <div class="col-md-6 mb-3">
                 <label class="form-label">Full Name</label>
-                <input type="text" class="form-control" name="reName" required>
+                <input type="text" class="form-control" name="reName">
+                <div class="invalid-feedback">Please provide your name</div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Phone Number</label>
-                <input type="tel" class="form-control" name="rePhone" required>
+                <input type="tel" class="form-control" name="rePhone">
+                <div class="invalid-feedback">Please provide phone number</div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Email</label>
@@ -183,7 +206,8 @@
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Location/Operating Area</label>
-                <input type="text" class="form-control" name="reLocation" required>
+                <input type="text" class="form-control" name="reLocation">
+                <div class="invalid-feedback">Please provide location</div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Specialization</label>
