@@ -7,24 +7,70 @@ document.addEventListener('DOMContentLoaded', () => {
   const userTypeSelect = document.getElementById('userType');
 
   const formSections = {
-    'Job Seeker': document.getElementById('jobSeekerFields'),
-    'Employer': document.getElementById('employerFields'),
-    'Real Estate': document.getElementById('realEstateFields')
+    'Job Seeker': {
+      element: document.getElementById('jobSeekerFields'),
+      requiredFields: ['name', 'phone', 'location', 'profession', 'workType']
+    },
+    'Employer': {
+      element: document.getElementById('employerFields'),
+      requiredFields: ['employerName', 'contactPerson', 'employerPhone', 'employerLocation', 'workerProfession', 'jobDescription']
+    },
+    'Real Estate': {
+      element: document.getElementById('realEstateFields'),
+      requiredFields: ['reName', 'rePhone', 'reLocation']
+    }
   };
 
   // Show relevant fields based on selected user type
   if (userTypeSelect) {
     userTypeSelect.addEventListener('change', function() {
       const type = this.value;
-      Object.entries(formSections).forEach(([key, section]) => {
-        section.classList.toggle('hidden', key !== type);
+      
+      // Hide all sections first
+      Object.values(formSections).forEach(section => {
+        section.element.classList.add('hidden');
       });
+      
+      // Show selected section
+      if (type && formSections[type]) {
+        formSections[type].element.classList.remove('hidden');
+      }
     });
   }
 
   if (form) {
     form.addEventListener('submit', async function(e) {
       e.preventDefault();
+      
+      // Clear previous validation
+      form.querySelectorAll('.is-invalid').forEach(el => {
+        el.classList.remove('is-invalid');
+      });
+
+      // Validate form
+      const currentType = userTypeSelect.value;
+      const currentSection = formSections[currentType];
+      let isValid = true;
+      
+      if (currentSection) {
+        currentSection.requiredFields.forEach(fieldName => {
+          const input = form.querySelector(`[name="${fieldName}"]`);
+          if (input && !input.value.trim()) {
+            isValid = false;
+            input.classList.add('is-invalid');
+          }
+        });
+      }
+      
+      if (!isValid) {
+        status.innerHTML = `
+          <div class="alert-message alert-error">
+            <strong>Error:</strong> Please fill in all required fields
+          </div>
+        `;
+        status.scrollIntoView({ behavior: 'smooth' });
+        return;
+      }
 
       // Disable button during submission
       if (submitBtn) {
@@ -89,6 +135,10 @@ document.addEventListener('DOMContentLoaded', () => {
               <strong>Success!</strong> Your registration has been submitted.
             </div>
           `;
+          form.reset();
+          Object.values(formSections).forEach(section => {
+            section.element.classList.add('hidden');
+          });
         } else {
           throw new Error(result.message || "Unknown error");
         }
@@ -96,18 +146,14 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error("Submission failed:", error);
         status.innerHTML = `
           <div class="alert-message alert-error">
-            <strong>Error:</strong> ${error.message}
+            <strong>Error:</strong> ${error.message || "Failed to submit form. Please try again."}
           </div>
         `;
       } finally {
-        form.reset();
-        Object.values(formSections).forEach(section => section.classList.add('hidden'));
-
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.textContent = "Submit";
         }
-
         status.scrollIntoView({ behavior: 'smooth' });
       }
     });
