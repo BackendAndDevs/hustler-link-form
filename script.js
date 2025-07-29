@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Show relevant fields based on selected user type
   if (userTypeSelect) {
-    userTypeSelect.addEventListener('change', function () {
+    userTypeSelect.addEventListener('change', function() {
       const type = this.value;
       Object.entries(formSections).forEach(([key, section]) => {
         section.classList.toggle('hidden', key !== type);
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (form) {
-    form.addEventListener('submit', async function (e) {
+    form.addEventListener('submit', async function(e) {
       e.preventDefault();
 
       // Disable button during submission
@@ -34,12 +34,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Collect all form data
       const formData = new FormData(form);
-      const data = {};
-
-      for (const name of new Set([...formData.keys()])) {
-        const values = formData.getAll(name);
-        data[name] = values.length > 1 ? values : values[0];
-      }
+      const data = {
+        userType: formData.get('userType') || '',
+        // Job Seeker fields
+        name: formData.get('name') || '',
+        phone: formData.get('phone') || '',
+        email: formData.get('email') || '',
+        age: formData.get('age') || '',
+        gender: formData.get('gender') || '',
+        location: formData.get('location') || '',
+        profession: formData.get('profession') || '',
+        workType: formData.get('workType') || '',
+        language: formData.get('language') || '',
+        // Employer fields
+        employerName: formData.get('employerName') || '',
+        contactPerson: formData.get('contactPerson') || '',
+        employerPhone: formData.get('employerPhone') || '',
+        employerEmail: formData.get('employerEmail') || '',
+        employerLocation: formData.get('employerLocation') || '',
+        workerProfession: formData.get('workerProfession') || '',
+        jobDescription: formData.get('jobDescription') || '',
+        jobDuration: formData.get('jobDuration') || '',
+        payRange: formData.get('payRange') || '',
+        startDate: formData.get('startDate') || '',
+        requirements: formData.get('requirements') || '',
+        // Real Estate fields
+        reName: formData.get('reName') || '',
+        rePhone: formData.get('rePhone') || '',
+        reEmail: formData.get('reEmail') || '',
+        reCompany: formData.get('reCompany') || '',
+        reLocation: formData.get('reLocation') || '',
+        reSpecialization: formData.get('reSpecialization') || '',
+        reLicense: formData.get('reLicense') || '',
+        reServices: formData.getAll('reServices') || [],
+        rePriceRange: formData.get('rePriceRange') || '',
+        reLanguages: formData.get('reLanguages') || '',
+        reBio: formData.get('reBio') || ''
+      };
 
       try {
         const response = await fetch(scriptURL, {
