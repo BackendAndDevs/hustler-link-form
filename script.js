@@ -6,14 +6,13 @@ document.addEventListener('DOMContentLoaded', function() {
   const submitBtn = document.getElementById('submitBtn');
   const userTypeSelect = document.getElementById('userType');
 
-  // Initialize form sections
   const formSections = {
     'Job Seeker': document.getElementById('jobSeekerFields'),
     'Employer': document.getElementById('employerFields'),
     'Real Estate': document.getElementById('realEstateFields')
   };
 
-  // Handle user type selection
+  // Show only relevant section
   if (userTypeSelect) {
     userTypeSelect.addEventListener('change', function() {
       const type = this.value;
@@ -23,48 +22,48 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Handle form submission
   if (form) {
     form.addEventListener('submit', function(e) {
       e.preventDefault();
-      
-      // Disable submit button
+
+      // Disable button during submission
       if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.textContent = "Submitting...";
       }
 
-      // Create hidden iframe for form submission
+      // Create hidden iframe
       const iframe = document.createElement('iframe');
       iframe.name = 'hidden-iframe';
       iframe.style.display = 'none';
       document.body.appendChild(iframe);
 
-      // Create a form specifically for the iframe submission
+      // Create form for iframe submission
       const iframeForm = document.createElement('form');
       iframeForm.action = scriptURL;
       iframeForm.method = 'POST';
       iframeForm.target = 'hidden-iframe';
       iframeForm.style.display = 'none';
 
-      // Copy all form data to the new form
+      // Capture form data (including checkboxes with same name)
       const formData = new FormData(form);
-      for (const [name, value] of formData.entries()) {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = name;
-        input.value = value;
-        iframeForm.appendChild(input);
+      const fieldNames = new Set([...formData.keys()]);
+      for (const name of fieldNames) {
+        const values = formData.getAll(name);
+        for (const value of values) {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = name;
+          input.value = value;
+          iframeForm.appendChild(input);
+        }
       }
 
       document.body.appendChild(iframeForm);
-      
-      // Submit the form through the iframe
       iframeForm.submit();
 
-      // Set a timeout to check for completion
+      // Wait and reset
       setTimeout(() => {
-        // Show success message
         if (status) {
           status.innerHTML = `
             <div class="alert-message alert-success">
@@ -73,23 +72,20 @@ document.addEventListener('DOMContentLoaded', function() {
           `;
           status.scrollIntoView({ behavior: 'smooth' });
         }
-        
-        // Reset form
+
         form.reset();
         Object.values(formSections).forEach(section => {
           if (section) section.classList.add('hidden');
         });
 
-        // Clean up
         document.body.removeChild(iframe);
         document.body.removeChild(iframeForm);
 
-        // Re-enable submit button
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.textContent = "Submit";
         }
-      }, 2000); // 2 second delay to allow submission to complete
+      }, 2000); // delay to allow Google Apps Script to process
     });
   }
 });
