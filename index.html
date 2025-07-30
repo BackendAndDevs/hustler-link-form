@@ -247,6 +247,78 @@
     </div>
   </div>
 
-   <script src="script.js"></script>
+<!-- Add this script just before the closing </body> tag -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Show/hide form sections based on user type
+    const userTypeSelect = document.getElementById('userType');
+    const jobSeekerFields = document.getElementById('jobSeekerFields');
+    const employerFields = document.getElementById('employerFields');
+    const realEstateFields = document.getElementById('realEstateFields');
+    
+    userTypeSelect.addEventListener('change', function() {
+      jobSeekerFields.classList.add('hidden');
+      employerFields.classList.add('hidden');
+      realEstateFields.classList.add('hidden');
+      
+      if (this.value === 'Job Seeker') {
+        jobSeekerFields.classList.remove('hidden');
+      } else if (this.value === 'Employer') {
+        employerFields.classList.remove('hidden');
+      } else if (this.value === 'Real Estate') {
+        realEstateFields.classList.remove('hidden');
+      }
+    });
+    
+    // Form submission
+    const form = document.getElementById('userForm');
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const submitBtn = document.getElementById('submitBtn');
+      const statusDiv = document.getElementById('status');
+      
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting...';
+      statusDiv.innerHTML = '';
+      
+      // Get form data
+      const formData = new FormData(form);
+      const data = {};
+      formData.forEach((value, key) => {
+        data[key] = value;
+      });
+      
+      // Add timestamp
+      data.timestamp = new Date().toISOString();
+      
+      // Send data to Google Sheets
+      fetch('https://script.google.com/macros/s/AKfycbylzbKqMNWp0MtISWnGDN3-FR8kvLYfH1nS7cnJtiSxwl0z3DeVootZlR06QebxPaHWgg/exec', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.result === 'success') {
+          statusDiv.innerHTML = `<div class="alert-message alert-success">Thank you for registering! We'll be in touch soon.</div>`;
+          form.reset();
+        } else {
+          statusDiv.innerHTML = `<div class="alert-message alert-error">There was an error submitting your form. Please try again.</div>`;
+        }
+      })
+      .catch(error => {
+        statusDiv.innerHTML = `<div class="alert-message alert-error">There was an error submitting your form. Please try again.</div>`;
+        console.error('Error:', error);
+      })
+      .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit';
+      });
+    });
+  });
+</script>
 </body>
 </html>
