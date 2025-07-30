@@ -247,180 +247,111 @@
     </div>
   </div>
 
- <script>
-// Configuration
-const CONFIG = {
-  SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzPMhNqPfSMssHCmsitqSL7xkRiUQiO-g5jEqZAyNCGoa-YQAbNnVnYjn80LTYc/exec',
-  USE_PROXY: true, // Set to false for direct submission
-  PROXY_URL: 'https://corsproxy.io/?',
-  TIMEOUT: 10000 // 10 seconds
-};
-
-// DOM Elements
-const userForm = document.getElementById('userForm');
-const statusDiv = document.getElementById('status');
-
-// Initialize form
-document.addEventListener('DOMContentLoaded', function() {
-  setupFormToggle();
-  userForm.addEventListener('submit', handleFormSubmit);
-});
-
-// Setup form section toggling
-function setupFormToggle() {
-  const userTypeSelect = document.getElementById('userType');
-  const sections = {
-    'Job Seeker': document.getElementById('jobSeekerFields'),
-    'Employer': document.getElementById('employerFields'),
-    'Real Estate': document.getElementById('realEstateFields')
-  };
-
-  userTypeSelect.addEventListener('change', function() {
-    Object.values(sections).forEach(section => section.classList.add('hidden'));
-    if (this.value && sections[this.value]) {
-      sections[this.value].classList.remove('hidden');
-    }
-  });
-}
-
-// Handle form submission
-async function handleFormSubmit(e) {
-  e.preventDefault();
-  
-  const submitBtn = userForm.querySelector('button[type="submit"]');
-  submitBtn.disabled = true;
-  submitBtn.textContent = 'Submitting...';
-  statusDiv.innerHTML = '';
-  
-  try {
-    const formData = prepareFormData();
-    const response = await submitWithFallback(formData);
-    
-    if (response.status === 'success') {
-      showMessage('success', 'Thank you for registering! We\'ll be in touch soon.');
-      userForm.reset();
-    } else {
-      throw new Error(response.message || 'Submission failed');
-    }
-  } catch (error) {
-    showMessage('error', error.message || 'There was an error submitting your form. Please try again.');
-    console.error('Submission error:', error);
-  } finally {
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Submit';
-  }
-}
-
-// Prepare form data for submission
-function prepareFormData() {
-  const formData = new FormData(userForm);
-  const data = {
-    timestamp: new Date().toISOString(),
-    userType: formData.get('userType')
-  };
-
-  // Collect data based on user type
-  switch(data.userType) {
-    case 'Job Seeker':
-      data.name = formData.get('name');
-      data.phone = formData.get('phone');
-      data.email = formData.get('email');
-      data.age = formData.get('age');
-      data.gender = formData.get('gender');
-      data.location = formData.get('location');
-      data.profession = formData.get('profession');
-      data.workType = formData.get('workType');
-      data.language = formData.get('language');
-      break;
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Show/hide form sections based on user type
+      const userTypeSelect = document.getElementById('userType');
+      const jobSeekerFields = document.getElementById('jobSeekerFields');
+      const employerFields = document.getElementById('employerFields');
+      const realEstateFields = document.getElementById('realEstateFields');
       
-    case 'Employer':
-      data.contactPerson = formData.get('contactPerson');
-      data.employerPhone = formData.get('employerPhone');
-      data.employerEmail = formData.get('employerEmail');
-      data.employerLocation = formData.get('employerLocation');
-      data.workerType = formData.get('workerType');
-      data.jobDescription = formData.get('jobDescription');
-      data.jobDuration = formData.get('jobDuration');
-      data.payRange = formData.get('payRange');
-      data.startDate = formData.get('startDate');
-      data.requirements = formData.get('requirements');
-      break;
+      userTypeSelect.addEventListener('change', function() {
+        jobSeekerFields.classList.add('hidden');
+        employerFields.classList.add('hidden');
+        realEstateFields.classList.add('hidden');
+        
+        if (this.value === 'Job Seeker') {
+          jobSeekerFields.classList.remove('hidden');
+        } else if (this.value === 'Employer') {
+          employerFields.classList.remove('hidden');
+        } else if (this.value === 'Real Estate') {
+          realEstateFields.classList.remove('hidden');
+        }
+      });
       
-    case 'Real Estate':
-      data.reName = formData.get('reName');
-      data.rePhone = formData.get('rePhone');
-      data.reEmail = formData.get('reEmail');
-      data.reCompany = formData.get('reCompany');
-      data.reLocation = formData.get('reLocation');
-      data.reSpecialization = formData.get('reSpecialization');
-      data.reLicense = formData.get('reLicense');
-      data.reServices = Array.from(formData.getAll('reServices')).join(', ');
-      data.rePriceRange = formData.get('rePriceRange');
-      data.reLanguages = formData.get('reLanguages');
-      data.reBio = formData.get('reBio');
-      break;
-  }
-  
-  return data;
-}
+      // Form submission
+      const form = document.getElementById('userForm');
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const submitBtn = document.getElementById('submitBtn');
+        const statusDiv = document.getElementById('status');
+        
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...';
+        statusDiv.innerHTML = '';
+        
+        // Get form data
+        const formData = new FormData(form);
+        const data = {
+          timestamp: new Date().toISOString(),
+          userType: formData.get('userType')
+        };
+        
+        // Collect data based on user type
+        if (data.userType === 'Job Seeker') {
+          data.name = formData.get('name');
+          data.phone = formData.get('phone');
+          data.email = formData.get('email');
+          data.age = formData.get('age');
+          data.gender = formData.get('gender');
+          data.location = formData.get('location');
+          data.profession = formData.get('profession');
+          data.workType = formData.get('workType');
+          data.language = formData.get('language');
+        } 
+        else if (data.userType === 'Employer') {
+          data.contactPerson = formData.get('contactPerson');
+          data.employerPhone = formData.get('employerPhone');
+          data.employerEmail = formData.get('employerEmail');
+          data.employerLocation = formData.get('employerLocation');
+          data.workerType = formData.get('workerType');
+          data.jobDescription = formData.get('jobDescription');
+          data.jobDuration = formData.get('jobDuration');
+          data.payRange = formData.get('payRange');
+          data.startDate = formData.get('startDate');
+          data.requirements = formData.get('requirements');
+        }
+        else if (data.userType === 'Real Estate') {
+          data.reName = formData.get('reName');
+          data.rePhone = formData.get('rePhone');
+          data.reEmail = formData.get('reEmail');
+          data.reCompany = formData.get('reCompany');
+          data.reLocation = formData.get('reLocation');
+          data.reSpecialization = formData.get('reSpecialization');
+          data.reLicense = formData.get('reLicense');
+          data.reServices = Array.from(formData.getAll('reServices')).join(', ');
+          data.rePriceRange = formData.get('rePriceRange');
+          data.reLanguages = formData.get('reLanguages');
+          data.reBio = formData.get('reBio');
+        }
 
-// Submit with fallback to proxy if direct fails
-async function submitWithFallback(data) {
-  try {
-    // Try direct submission first if not forcing proxy
-    if (!CONFIG.USE_PROXY) {
-      try {
-        return await submitData(CONFIG.SCRIPT_URL, data);
-      } catch (directError) {
-        console.log('Direct submission failed, trying with proxy...');
-      }
-    }
-    
-    // Use proxy
-    const proxyUrl = `${CONFIG.PROXY_URL}${encodeURIComponent(CONFIG.SCRIPT_URL)}`;
-    return await submitData(proxyUrl, data);
-  } catch (error) {
-    throw new Error(`Submission failed: ${error.message}`);
-  }
-}
+        try {
+          // Use a proxy approach to avoid CORS issues
+          const response = await fetch('https://script.google.com/macros/s/AKfycbzPMhNqPfSMssHCmsitqSL7xkRiUQiO-g5jEqZAyNCGoa-YQAbNnVnYjn80LTYc/exec', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {
+              'Content-Type': 'text/plain;charset=utf-8',
+            },
+            redirect: 'follow'
+          });
 
-// Actual data submission function
-async function submitData(url, data) {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), CONFIG.TIMEOUT);
-
-  try {
-    const response = await fetch(url, {
-      method: 'POST',
-      body: JSON.stringify(data),
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest'
-      },
-      signal: controller.signal,
-      redirect: 'follow'
+          // Handle the redirect response
+          const result = await response.text();
+          console.log('Submission result:', result);
+          
+          statusDiv.innerHTML = `<div class="alert-message alert-success">Thank you for registering! We'll be in touch soon.</div>`;
+          form.reset();
+        } catch (error) {
+          console.error('Error:', error);
+          statusDiv.innerHTML = `<div class="alert-message alert-error">There was an error submitting your form. Please try again.</div>`;
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Submit';
+        }
+      });
     });
-
-    clearTimeout(timeoutId);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    return await response.json();
-  } catch (error) {
-    clearTimeout(timeoutId);
-    throw error;
-  }
-}
-
-// Show status message
-function showMessage(type, message) {
-  statusDiv.innerHTML = `
-    <div class="alert-message alert-${type}">
-      ${message}
-    </div>`;
-}
   </script>
 </body>
 </html>
