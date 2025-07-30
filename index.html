@@ -248,109 +248,93 @@
   </div>
 
  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const userTypeSelect = document.getElementById('userType');
-      const jobSeekerFields = document.getElementById('jobSeekerFields');
-      const employerFields = document.getElementById('employerFields');
-      const realEstateFields = document.getElementById('realEstateFields');
-      
-      userTypeSelect.addEventListener('change', function() {
-        jobSeekerFields.classList.add('hidden');
-        employerFields.classList.add('hidden');
-        realEstateFields.classList.add('hidden');
-        
-        if (this.value === 'Job Seeker') {
-          jobSeekerFields.classList.remove('hidden');
-        } else if (this.value === 'Employer') {
-          employerFields.classList.remove('hidden');
-        } else if (this.value === 'Real Estate') {
-          realEstateFields.classList.remove('hidden');
-        }
-      });
-      
-      // Form submission
-      const form = document.getElementById('userForm');
-      form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const submitBtn = document.getElementById('submitBtn');
-        const statusDiv = document.getElementById('status');
-        
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Submitting...';
-        statusDiv.innerHTML = '';
-        
-        // Get form data
-        const formData = new FormData(form);
-        const data = {
-          timestamp: new Date().toISOString(),
-          userType: formData.get('userType')
-        };
-        
-        // Collect data based on user type
-        if (data.userType === 'Job Seeker') {
-          data.name = formData.get('name');
-          data.phone = formData.get('phone');
-          data.email = formData.get('email');
-          data.age = formData.get('age');
-          data.gender = formData.get('gender');
-          data.location = formData.get('location');
-          data.profession = formData.get('profession');
-          data.workType = formData.get('workType');
-          data.language = formData.get('language');
-        } 
-        else if (data.userType === 'Employer') {
-          data.contactPerson = formData.get('contactPerson');
-          data.employerPhone = formData.get('employerPhone');
-          data.employerEmail = formData.get('employerEmail');
-          data.employerLocation = formData.get('employerLocation');
-          data.workerType = formData.get('workerType');
-          data.jobDescription = formData.get('jobDescription');
-          data.jobDuration = formData.get('jobDuration');
-          data.payRange = formData.get('payRange');
-          data.startDate = formData.get('startDate');
-          data.requirements = formData.get('requirements');
-        }
-        else if (data.userType === 'Real Estate') {
-          data.reName = formData.get('reName');
-          data.rePhone = formData.get('rePhone');
-          data.reEmail = formData.get('reEmail');
-          data.reCompany = formData.get('reCompany');
-          data.reLocation = formData.get('reLocation');
-          data.reSpecialization = formData.get('reSpecialization');
-          data.reLicense = formData.get('reLicense');
-          data.reServices = Array.from(formData.getAll('reServices')).join(', ');
-          data.rePriceRange = formData.get('rePriceRange');
-          data.reLanguages = formData.get('reLanguages');
-          data.reBio = formData.get('reBio');
-        }
+ document.getElementById('userForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  
+  const submitBtn = document.getElementById('submitBtn');
+  const statusDiv = document.getElementById('status');
+  
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Submitting...';
+  statusDiv.innerHTML = '';
+  
+  // Get form data
+  const formData = new FormData(this);
+  const data = {
+    timestamp: new Date().toISOString(),
+    userType: formData.get('userType')
+  };
 
-        try {
-          // Use a proxy approach to avoid CORS issues
-          const response = await fetch('https://script.google.com/macros/s/AKfycbzPMhNqPfSMssHCmsitqSL7xkRiUQiO-g5jEqZAyNCGoa-YQAbNnVnYjn80LTYc/exec', {
-            method: 'POST',
-            body: JSON.stringify(data),
-            headers: {
-              'Content-Type': 'text/plain;charset=utf-8',
-            },
-            redirect: 'follow'
-          });
+  // Collect data based on user type
+  if (data.userType === 'Job Seeker') {
+    data.name = formData.get('name');
+    data.phone = formData.get('phone');
+    data.email = formData.get('email');
+    data.age = formData.get('age');
+    data.gender = formData.get('gender');
+    data.location = formData.get('location');
+    data.profession = formData.get('profession');
+    data.workType = formData.get('workType');
+    data.language = formData.get('language');
+  } 
+  else if (data.userType === 'Employer') {
+    data.contactPerson = formData.get('contactPerson');
+    data.employerPhone = formData.get('employerPhone');
+    data.employerEmail = formData.get('employerEmail');
+    data.employerLocation = formData.get('employerLocation');
+    data.workerType = formData.get('workerType');
+    data.jobDescription = formData.get('jobDescription');
+    data.jobDuration = formData.get('jobDuration');
+    data.payRange = formData.get('payRange');
+    data.startDate = formData.get('startDate');
+    data.requirements = formData.get('requirements');
+  }
+  else if (data.userType === 'Real Estate') {
+    data.reName = formData.get('reName');
+    data.rePhone = formData.get('rePhone');
+    data.reEmail = formData.get('reEmail');
+    data.reCompany = formData.get('reCompany');
+    data.reLocation = formData.get('reLocation');
+    data.reSpecialization = formData.get('reSpecialization');
+    data.reLicense = formData.get('reLicense');
+    data.reServices = Array.from(formData.getAll('reServices')).join(', ');
+    data.rePriceRange = formData.get('rePriceRange');
+    data.reLanguages = formData.get('reLanguages');
+    data.reBio = formData.get('reBio');
+  }
 
-          // Handle the redirect response
-          const result = await response.text();
-          console.log('Submission result:', result);
-          
-          statusDiv.innerHTML = `<div class="alert-message alert-success">Thank you for registering! We'll be in touch soon.</div>`;
-          form.reset();
-        } catch (error) {
-          console.error('Error:', error);
-          statusDiv.innerHTML = `<div class="alert-message alert-error">There was an error submitting your form. Please try again.</div>`;
-        } finally {
-          submitBtn.disabled = false;
-          submitBtn.textContent = 'Submit';
-        }
-      });
+  try {
+    // Use your deployed web app URL
+    const response = await fetch('https://script.google.com/macros/s/AKfycbzPMhNqPfSMssHCmsitqSL7xkRiUQiO-g5jEqZAyNCGoa-YQAbNnVnYjn80LTYc/exec', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json'
+      }
     });
+
+    const result = await response.json();
+    
+    if (result.result === 'success') {
+      statusDiv.innerHTML = `
+        <div class="alert-message alert-success">
+          Thank you for registering! We'll be in touch soon.
+        </div>`;
+      this.reset();
+    } else {
+      throw new Error(result.message || 'Submission failed');
+    }
+  } catch (error) {
+    console.error('Submission error:', error);
+    statusDiv.innerHTML = `
+      <div class="alert-message alert-error">
+        Error: ${error.message || 'There was an error submitting your form. Please try again.'}
+      </div>`;
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Submit';
+  }
+});
   </script>
 </body>
 </html>
