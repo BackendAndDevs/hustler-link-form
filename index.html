@@ -248,93 +248,171 @@
   </div>
 
  <script>
- document.getElementById('userForm').addEventListener('submit', async function(e) {
+// DOM Elements
+const userForm = document.getElementById('userForm');
+const userTypeSelect = document.getElementById('userType');
+const jobSeekerFields = document.getElementById('jobSeekerFields');
+const employerFields = document.getElementById('employerFields');
+const realEstateFields = document.getElementById('realEstateFields');
+const statusDiv = document.getElementById('status');
+
+// Google Apps Script Deployment URL (REPLACE WITH YOUR ACTUAL URL)
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzPMhNqPfSMssHCmsitqSL7xkRiUQiO-g5jEqZAyNCGoa-YQAbNnVnYjn80LTYc/exec';
+
+// CORS Proxy Fallback URL
+const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
+
+// Initialize form
+document.addEventListener('DOMContentLoaded', function() {
+  // Show/hide form sections based on user type
+  userTypeSelect.addEventListener('change', toggleFormSections);
+  
+  // Form submission handler
+  userForm.addEventListener('submit', handleFormSubmit);
+});
+
+// Toggle form sections based on selected user type
+function toggleFormSections() {
+  const selectedType = this.value;
+  
+  // Hide all sections first
+  [jobSeekerFields, employerFields, realEstateFields].forEach(section => {
+    section.classList.add('hidden');
+  });
+  
+  // Show relevant section
+  switch(selectedType) {
+    case 'Job Seeker':
+      jobSeekerFields.classList.remove('hidden');
+      break;
+    case 'Employer':
+      employerFields.classList.remove('hidden');
+      break;
+    case 'Real Estate':
+      realEstateFields.classList.remove('hidden');
+      break;
+  }
+}
+
+// Handle form submission
+async function handleFormSubmit(e) {
   e.preventDefault();
   
-  const submitBtn = document.getElementById('submitBtn');
-  const statusDiv = document.getElementById('status');
+  const submitBtn = userForm.querySelector('button[type="submit"]');
   
+  // Disable submit button during processing
   submitBtn.disabled = true;
   submitBtn.textContent = 'Submitting...';
   statusDiv.innerHTML = '';
   
-  // Get form data
-  const formData = new FormData(this);
-  const data = {
-    timestamp: new Date().toISOString(),
-    userType: formData.get('userType')
-  };
-
-  // Collect data based on user type
-  if (data.userType === 'Job Seeker') {
-    data.name = formData.get('name');
-    data.phone = formData.get('phone');
-    data.email = formData.get('email');
-    data.age = formData.get('age');
-    data.gender = formData.get('gender');
-    data.location = formData.get('location');
-    data.profession = formData.get('profession');
-    data.workType = formData.get('workType');
-    data.language = formData.get('language');
-  } 
-  else if (data.userType === 'Employer') {
-    data.contactPerson = formData.get('contactPerson');
-    data.employerPhone = formData.get('employerPhone');
-    data.employerEmail = formData.get('employerEmail');
-    data.employerLocation = formData.get('employerLocation');
-    data.workerType = formData.get('workerType');
-    data.jobDescription = formData.get('jobDescription');
-    data.jobDuration = formData.get('jobDuration');
-    data.payRange = formData.get('payRange');
-    data.startDate = formData.get('startDate');
-    data.requirements = formData.get('requirements');
-  }
-  else if (data.userType === 'Real Estate') {
-    data.reName = formData.get('reName');
-    data.rePhone = formData.get('rePhone');
-    data.reEmail = formData.get('reEmail');
-    data.reCompany = formData.get('reCompany');
-    data.reLocation = formData.get('reLocation');
-    data.reSpecialization = formData.get('reSpecialization');
-    data.reLicense = formData.get('reLicense');
-    data.reServices = Array.from(formData.getAll('reServices')).join(', ');
-    data.rePriceRange = formData.get('rePriceRange');
-    data.reLanguages = formData.get('reLanguages');
-    data.reBio = formData.get('reBio');
-  }
-
   try {
-    // Use your deployed web app URL
-    const response = await fetch('https://script.google.com/macros/s/AKfycbzPMhNqPfSMssHCmsitqSL7xkRiUQiO-g5jEqZAyNCGoa-YQAbNnVnYjn80LTYc/exec', {
-      method: 'POST',
-      body: JSON.stringify(data),
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+    // Prepare form data
+    const formData = new FormData(userForm);
+    const data = {
+      timestamp: new Date().toISOString(),
+      userType: formData.get('userType')
+    };
+
+    // Collect data based on user type
+    collectFormData(formData, data);
+
+    // Try direct submission first
+    let response = await submitToGoogleScript(SCRIPT_URL, data);
+    
+    // If direct submission fails, try with CORS proxy
+    if (!response.ok) {
+      console.log('Direct submission failed, trying with CORS proxy...');
+      response = await submitToGoogleScript(CORS_PROXY + SCRIPT_URL, data);
+    }
 
     const result = await response.json();
     
-    if (result.result === 'success') {
-      statusDiv.innerHTML = `
-        <div class="alert-message alert-success">
-          Thank you for registering! We'll be in touch soon.
-        </div>`;
-      this.reset();
+    if (result.status === 'success') {
+      showSuccessMessage('Thank you for registering! We\'ll be in touch soon.');
+      userForm.reset();
     } else {
       throw new Error(result.message || 'Submission failed');
     }
   } catch (error) {
+    showErrorMessage(error.message || 'There was an error submitting your form. Please try again.');
     console.error('Submission error:', error);
-    statusDiv.innerHTML = `
-      <div class="alert-message alert-error">
-        Error: ${error.message || 'There was an error submitting your form. Please try again.'}
-      </div>`;
   } finally {
     submitBtn.disabled = false;
     submitBtn.textContent = 'Submit';
   }
-});
+}
+
+// Submit data to Google Apps Script
+async function submitToGoogleScript(url, data) {
+  return await fetch(url, {
+    method: 'POST',
+    body: JSON.stringify(data),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    redirect: 'follow'
+  });
+}
+
+// Collect form data based on user type
+function collectFormData(formData, data) {
+  switch(data.userType) {
+    case 'Job Seeker':
+      data.name = formData.get('name');
+      data.phone = formData.get('phone');
+      data.email = formData.get('email');
+      data.age = formData.get('age');
+      data.gender = formData.get('gender');
+      data.location = formData.get('location');
+      data.profession = formData.get('profession');
+      data.workType = formData.get('workType');
+      data.language = formData.get('language');
+      break;
+      
+    case 'Employer':
+      data.contactPerson = formData.get('contactPerson');
+      data.employerPhone = formData.get('employerPhone');
+      data.employerEmail = formData.get('employerEmail');
+      data.employerLocation = formData.get('employerLocation');
+      data.workerType = formData.get('workerType');
+      data.jobDescription = formData.get('jobDescription');
+      data.jobDuration = formData.get('jobDuration');
+      data.payRange = formData.get('payRange');
+      data.startDate = formData.get('startDate');
+      data.requirements = formData.get('requirements');
+      break;
+      
+    case 'Real Estate':
+      data.reName = formData.get('reName');
+      data.rePhone = formData.get('rePhone');
+      data.reEmail = formData.get('reEmail');
+      data.reCompany = formData.get('reCompany');
+      data.reLocation = formData.get('reLocation');
+      data.reSpecialization = formData.get('reSpecialization');
+      data.reLicense = formData.get('reLicense');
+      data.reServices = Array.from(formData.getAll('reServices')).join(', ');
+      data.rePriceRange = formData.get('rePriceRange');
+      data.reLanguages = formData.get('reLanguages');
+      data.reBio = formData.get('reBio');
+      break;
+  }
+}
+
+// Show success message
+function showSuccessMessage(message) {
+  statusDiv.innerHTML = `
+    <div class="alert-message alert-success">
+      ${message}
+    </div>`;
+}
+
+// Show error message
+function showErrorMessage(message) {
+  statusDiv.innerHTML = `
+    <div class="alert-message alert-error">
+      ${message}
+    </div>`;
+}
   </script>
 </body>
 </html>
