@@ -248,50 +248,39 @@
   </div>
 
  <script>
+// Configuration
+const CONFIG = {
+  SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzPMhNqPfSMssHCmsitqSL7xkRiUQiO-g5jEqZAyNCGoa-YQAbNnVnYjn80LTYc/exec',
+  USE_PROXY: true, // Set to false for direct submission
+  PROXY_URL: 'https://corsproxy.io/?',
+  TIMEOUT: 10000 // 10 seconds
+};
+
 // DOM Elements
 const userForm = document.getElementById('userForm');
-const userTypeSelect = document.getElementById('userType');
-const jobSeekerFields = document.getElementById('jobSeekerFields');
-const employerFields = document.getElementById('employerFields');
-const realEstateFields = document.getElementById('realEstateFields');
 const statusDiv = document.getElementById('status');
-
-// Google Apps Script Deployment URL (REPLACE WITH YOUR ACTUAL URL)
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzPMhNqPfSMssHCmsitqSL7xkRiUQiO-g5jEqZAyNCGoa-YQAbNnVnYjn80LTYc/exec';
-
-// CORS Proxy Fallback URL
-const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
 
 // Initialize form
 document.addEventListener('DOMContentLoaded', function() {
-  // Show/hide form sections based on user type
-  userTypeSelect.addEventListener('change', toggleFormSections);
-  
-  // Form submission handler
+  setupFormToggle();
   userForm.addEventListener('submit', handleFormSubmit);
 });
 
-// Toggle form sections based on selected user type
-function toggleFormSections() {
-  const selectedType = this.value;
-  
-  // Hide all sections first
-  [jobSeekerFields, employerFields, realEstateFields].forEach(section => {
-    section.classList.add('hidden');
+// Setup form section toggling
+function setupFormToggle() {
+  const userTypeSelect = document.getElementById('userType');
+  const sections = {
+    'Job Seeker': document.getElementById('jobSeekerFields'),
+    'Employer': document.getElementById('employerFields'),
+    'Real Estate': document.getElementById('realEstateFields')
+  };
+
+  userTypeSelect.addEventListener('change', function() {
+    Object.values(sections).forEach(section => section.classList.add('hidden'));
+    if (this.value && sections[this.value]) {
+      sections[this.value].classList.remove('hidden');
+    }
   });
-  
-  // Show relevant section
-  switch(selectedType) {
-    case 'Job Seeker':
-      jobSeekerFields.classList.remove('hidden');
-      break;
-    case 'Employer':
-      employerFields.classList.remove('hidden');
-      break;
-    case 'Real Estate':
-      realEstateFields.classList.remove('hidden');
-      break;
-  }
 }
 
 // Handle form submission
@@ -299,42 +288,22 @@ async function handleFormSubmit(e) {
   e.preventDefault();
   
   const submitBtn = userForm.querySelector('button[type="submit"]');
-  
-  // Disable submit button during processing
   submitBtn.disabled = true;
   submitBtn.textContent = 'Submitting...';
   statusDiv.innerHTML = '';
   
   try {
-    // Prepare form data
-    const formData = new FormData(userForm);
-    const data = {
-      timestamp: new Date().toISOString(),
-      userType: formData.get('userType')
-    };
-
-    // Collect data based on user type
-    collectFormData(formData, data);
-
-    // Try direct submission first
-    let response = await submitToGoogleScript(SCRIPT_URL, data);
+    const formData = prepareFormData();
+    const response = await submitWithFallback(formData);
     
-    // If direct submission fails, try with CORS proxy
-    if (!response.ok) {
-      console.log('Direct submission failed, trying with CORS proxy...');
-      response = await submitToGoogleScript(CORS_PROXY + SCRIPT_URL, data);
-    }
-
-    const result = await response.json();
-    
-    if (result.status === 'success') {
-      showSuccessMessage('Thank you for registering! We\'ll be in touch soon.');
+    if (response.status === 'success') {
+      showMessage('success', 'Thank you for registering! We\'ll be in touch soon.');
       userForm.reset();
     } else {
-      throw new Error(result.message || 'Submission failed');
+      throw new Error(response.message || 'Submission failed');
     }
   } catch (error) {
-    showErrorMessage(error.message || 'There was an error submitting your form. Please try again.');
+    showMessage('error', error.message || 'There was an error submitting your form. Please try again.');
     console.error('Submission error:', error);
   } finally {
     submitBtn.disabled = false;
@@ -342,20 +311,15 @@ async function handleFormSubmit(e) {
   }
 }
 
-// Submit data to Google Apps Script
-async function submitToGoogleScript(url, data) {
-  return await fetch(url, {
-    method: 'POST',
-    body: JSON.stringify(data),
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    redirect: 'follow'
-  });
-}
+// Prepare form data for submission
+function prepareFormData() {
+  const formData = new FormData(userForm);
+  const data = {
+    timestamp: new Date().toISOString(),
+    userType: formData.get('userType')
+  };
 
-// Collect form data based on user type
-function collectFormData(formData, data) {
+  // Collect data based on user type
   switch(data.userType) {
     case 'Job Seeker':
       data.name = formData.get('name');
@@ -396,20 +360,64 @@ function collectFormData(formData, data) {
       data.reBio = formData.get('reBio');
       break;
   }
+  
+  return data;
 }
 
-// Show success message
-function showSuccessMessage(message) {
-  statusDiv.innerHTML = `
-    <div class="alert-message alert-success">
-      ${message}
-    </div>`;
+// Submit with fallback to proxy if direct fails
+async function submitWithFallback(data) {
+  try {
+    // Try direct submission first if not forcing proxy
+    if (!CONFIG.USE_PROXY) {
+      try {
+        return await submitData(CONFIG.SCRIPT_URL, data);
+      } catch (directError) {
+        console.log('Direct submission failed, trying with proxy...');
+      }
+    }
+    
+    // Use proxy
+    const proxyUrl = `${CONFIG.PROXY_URL}${encodeURIComponent(CONFIG.SCRIPT_URL)}`;
+    return await submitData(proxyUrl, data);
+  } catch (error) {
+    throw new Error(`Submission failed: ${error.message}`);
+  }
 }
 
-// Show error message
-function showErrorMessage(message) {
+// Actual data submission function
+async function submitData(url, data) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), CONFIG.TIMEOUT);
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      signal: controller.signal,
+      redirect: 'follow'
+    });
+
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw error;
+  }
+}
+
+// Show status message
+function showMessage(type, message) {
   statusDiv.innerHTML = `
-    <div class="alert-message alert-error">
+    <div class="alert-message alert-${type}">
       ${message}
     </div>`;
 }
