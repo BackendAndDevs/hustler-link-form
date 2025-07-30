@@ -295,6 +295,7 @@
       // Send data to Google Sheets
       fetch('https://script.google.com/macros/s/AKfycbzPMhNqPfSMssHCmsitqSL7xkRiUQiO-g5jEqZAyNCGoa-YQAbNnVnYjn80LTYc/exec', {
         method: 'POST',
+        mode: 'no-cors',
         headers: {
           'Content-Type': 'application/json',
         },
