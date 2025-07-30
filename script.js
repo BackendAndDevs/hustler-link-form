@@ -1,4 +1,4 @@
-const scriptURL = 'https://script.google.com/macros/s/AKfycbyBKsURnjHmLjxKJPdsEXod-_gpFCX_6r6HowZonUCBWVe8eoTXu1BWd2lZt-5MsN_6WQ/exec';
+const scriptURL = 'https://script.google.com/macros/s/AKfycbx-BzBvIZ4SYxPbYMcqFxubqysoVxv4lomqHoUZFmpnLek-CYVP7bBUzngpQQC9KxFN9Q/exec';
 
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('userForm');
